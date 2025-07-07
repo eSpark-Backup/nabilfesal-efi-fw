@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>com.microchip.mplab.nbide.embedded.makeproject</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/make-project/1">
+            <name>EFI</name>
+            <creation-uuid>4fead027-2526-4eed-9708-c69c1ed3327e</creation-uuid>
+            <make-project-type>0</make-project-type>
+            <sourceEncoding>ISO-8859-1</sourceEncoding>
+            <make-dep-projects/>
+            <sourceRootList>
+                <sourceRootElem>components/Battery</sourceRootElem>
+                <sourceRootElem>components/Declarations</sourceRootElem>
+                <sourceRootElem>components/Relay</sourceRootElem>
+                <sourceRootElem>components/LED</sourceRootElem>
+                <sourceRootElem>components/Sleep</sourceRootElem>
+                <sourceRootElem>components/Flag</sourceRootElem>
+                <sourceRootElem>components/Button</sourceRootElem>
+            </sourceRootList>
+            <confList>
+                <confElem>
+                    <name>default</name>
+                    <type>2</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
+        </data>
+    </configuration>
+</project>
