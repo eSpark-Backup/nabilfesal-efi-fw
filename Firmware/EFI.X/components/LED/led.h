@@ -2,7 +2,8 @@
 #define LED_H
 
 void led_init();
-void blink_led_battery(unsigned char time);
-void blink_led_status(unsigned char time);
+void led_off();
+void blink_battery_led(unsigned char time);
+void blink_status_led(unsigned char time);
 
 #endif /* LED_H */

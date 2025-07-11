@@ -1,19 +1,35 @@
 #include <xc.h>
 #include "sleep.h"
+#include "../Declarations/declaration.h"
 
 void sleep_init()
 {
-    TRISB3 = 1;             // External interrupt pin
-    OPTION_REGbits.nRBPU = 0;  // Enable pull-ups
-    IOCBbits.IOCB3 = 1;     // Enable IOC on RB3
-    INTCONbits.RBIF = 0;    // Clear interrupt-on-change flag
-    INTCONbits.RBIE = 1;    // Enable Port B interrupts
-    INTCONbits.GIE = 1;     // Global Interrupt Enable
+    // INT0 config (RB0)
+    INTCONbits.INTE = 1;          // Enable external interrupt on RB0
+    INTCONbits.INTF = 0;          // Clear interrupt flag
+    OPTION_REGbits.INTEDG = 0;    // Falling edge (1 = rising)
+
+    // IOC config
+    IOCBbits.IOCB3 = 1;
+    IOCBbits.IOCB4 = 1;
+    INTCONbits.RBIE = 1;
+    INTCONbits.RBIF = 0;
 }
             
 void sleep_func()
 {
-    INTCONbits.RBIF = 0;  // Clear the flag
-    SLEEP();              // Sleep until IOC occurs
-    NOP();                // Required after wakeup on some chips
+    // Turn off Timer1 interrupt to prevent waking
+    PIE1bits.TMR1IE = 0;
+    T1CONbits.TMR1ON = 0;
+
+    // Set BOOST_PWR pin LOW before sleep
+    
+    // Optional: Turn off ADC
+    // ADCON0bits.ADON = 0;
+
+    __delay_ms(200);
+    BOOST_PWR = 0;
+    // Now actually sleep
+    SLEEP();
+    NOP();  // Safety after wake-up
 }

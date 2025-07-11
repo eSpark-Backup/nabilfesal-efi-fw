@@ -3,19 +3,24 @@
 #include "../LED/led.h"
 #include "../Declarations/declaration.h"
 
+#define BAT_OK      true
+#define BAT_LOW     false
+
 static bool batteryLow = 0;
 
 void battery_init()
 {
     TRISB5 = 1;   // Battery sense as input
     TRISA5 = 0;   // Battery Load
+    
+    BATT_LOAD = 0;
 }
 
 void delay_5ms_with_timer0()
 {
-    // Assuming 4MHz -> Instruction cycle = 1µs (Fosc/4)
-    // Prescaler 1:64 -> 1 tick = 64µs
-    // For 5ms ? 5000µs / 64µs ? 78 counts (255 - 78 = 177 preload)
+    // Assuming 4MHz -> Instruction cycle = 1ï¿½s (Fosc/4)
+    // Prescaler 1:64 -> 1 tick = 64ï¿½s
+    // For 5ms ? 5000ï¿½s / 64ï¿½s ? 78 counts (255 - 78 = 177 preload)
 
     OPTION_REGbits.T0CS = 0;   // Timer0 uses internal instruction cycle clock (Fosc/4)
     OPTION_REGbits.PSA = 0;    // Prescaler is assigned to Timer0
@@ -42,11 +47,12 @@ void battery_test()
     BATT_LOAD = 0;
     if(batteryLow)
     {
-        blink_led_battery(5);
+        SystemState_obj.current_state = BATTERY_LOW;
         batteryLow = 0;
     }
     else
     {
-        blink_led_battery(1);
+        blink_battery_led(1);
+        SystemState_obj.current_state = SLEEP;
     }
 }
