@@ -40,6 +40,18 @@ void delay_5ms_with_timer0()
     INTCONbits.TMR0IF = 0;     // Clear flag just in case
 }
 
+void battery_check()
+{
+    if(!BATT_LOW_SNS)
+    {
+        SystemState_obj.current_state = BATTERY_LOW;
+    }
+    else
+    {
+        blink_battery_led(1);
+    }
+}
+
 void battery_test()
 {   
     BATT_LOAD = 1;

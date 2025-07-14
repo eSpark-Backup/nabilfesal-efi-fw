@@ -2,7 +2,6 @@
 #define DECLARATION_H
 
 #include <xc.h>
-#include <stdbool.h>
 
 #define _XTAL_FREQ 2000000
 
@@ -35,18 +34,15 @@
 #define TEST_RST        RB0
 #define EXT_WAKEUP      RB3
 #define CT_WAKEUP       RB4
-//#define BATT_LOW_SNS    RB5
 
 typedef enum {
-    STATE_IDLE = 0,
-    STARTUP_CYCLE,
+    STARTUP_CYCLE = 0,
     STATE_TEST_RESET,
     STATE_EXT_WAKEUP,
     STATE_CT_WAKEUP,
     FLAG_SET,
     FLAG_RESET,
     FAULT,
-    FAULT_CLEAR,
     FAULT_TOGGLE,
     BATTERY_LOW,
     SLEEP

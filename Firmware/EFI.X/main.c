@@ -1,4 +1,3 @@
-#include <xc.h>
 #include "components/LED/led.h"
 #include "components/Flag/flag.h"
 #include "components/Relay/relay.h"
@@ -17,7 +16,7 @@
 #pragma config WRT = OFF
 
 volatile StateMachine_t SystemState_obj = {
-    .current_state = STATE_IDLE
+    .current_state = STARTUP_CYCLE
 };
 
 void main(void)
@@ -35,8 +34,6 @@ void main(void)
 
     PORTA = 0; 
     PORTD = 0;
-    
-    SystemState_obj.current_state = STARTUP_CYCLE;
 
     while (1)
     {
@@ -48,27 +45,25 @@ void main(void)
                 break;
 
             case STATE_TEST_RESET:
-                control_boost_output();
-                SystemState_obj.current_state = FAULT_TOGGLE;
-                break;
-
             case STATE_EXT_WAKEUP:
+                battery_check();
                 control_boost_output();
                 SystemState_obj.current_state = FAULT_TOGGLE;
                 break;
 
             case STATE_CT_WAKEUP:
+                battery_check();
                 control_boost_output();
                 SystemState_obj.current_state = FLAG_SET;
                 break;
                 
             case FLAG_SET:
-                relay_set();
+                relay_trig(SET);
                 flag_trig();
                 break;
                 
             case FLAG_RESET:
-                relay_reset();
+                relay_trig(CLEAR);
                 flag_trig();
                 break;
             
@@ -79,7 +74,7 @@ void main(void)
             case FAULT_TOGGLE:
                 flag_trig();
                 break;
-
+            
             case BATTERY_LOW:
                 blink_battery_led(5);
                 break;

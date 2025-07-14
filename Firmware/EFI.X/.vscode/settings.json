@@ -4,6 +4,7 @@
         "declaration.h": "c",
         "flag.h": "c",
         "led.h": "c",
-        "battery.h": "c"
+        "battery.h": "c",
+        "stdbool.h": "c"
     }
 }

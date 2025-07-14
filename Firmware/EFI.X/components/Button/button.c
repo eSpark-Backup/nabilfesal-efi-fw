@@ -1,5 +1,6 @@
 #include "button.h"
 #include "../Flag/flag.h"
+#include "../Declarations/declaration.h"
 
 void button_init()
 {
@@ -34,7 +35,7 @@ void handle_test_rst()
 
 void handle_ext_wakeup()
 {
-    SystemState_obj.current_state = FAULT;
+    SystemState_obj.current_state = STATE_EXT_WAKEUP;
 }
 
 void handle_ct_wakeup()

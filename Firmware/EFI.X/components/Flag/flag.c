@@ -1,7 +1,7 @@
 #include "flag.h"
 #include "../Declarations/declaration.h"
 
-static bool state = 0;
+static bool flag_state = 0;
 
 /*FLAG SET
 LDRV_1 = 0;
@@ -24,13 +24,13 @@ void flag_init()
 
 void flag_trig()
 {
-    LDRV_1 = state;
-    LDRV_2 = !state;
+    LDRV_1 = flag_state;
+    LDRV_2 = !flag_state;
     __delay_ms(500);
     LDRV_1 = 0;
     LDRV_2 = 0;
     
-    if(!state)
+    if(!flag_state)
     {
         SystemState_obj.current_state = FAULT;
     }
@@ -39,5 +39,5 @@ void flag_trig()
         SystemState_obj.current_state = SLEEP;
     }
 
-    state = !state;
+    flag_state = !flag_state;
 }
