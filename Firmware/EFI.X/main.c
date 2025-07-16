@@ -16,7 +16,7 @@
 #pragma config WRT = OFF
 
 volatile StateMachine_t SystemState_obj = {
-    .current_state = STARTUP_CYCLE
+    .current_state = LED_TEST
 };
 
 void main(void)
@@ -40,20 +40,29 @@ void main(void)
        switch (SystemState_obj.current_state)
        {
             case STARTUP_CYCLE:
-                control_boost_output();
+                __delay_ms(500);
                 battery_test();
+                // boost_en = 1;
+                // control_boost_output();
+                // boost_en = 0;
+                flag_trig();
                 break;
-
+                
             case STATE_TEST_RESET:
             case STATE_EXT_WAKEUP:
-                battery_check();
-                control_boost_output();
-                SystemState_obj.current_state = FAULT_TOGGLE;
+                SystemState_obj.current_state = LED_TEST;
+                // battery_check();
+                // boost_en = 1;
+                // control_boost_output();
+                // boost_en = 0;
+                // SystemState_obj.current_state = FAULT_TOGGLE;
                 break;
-
+                
             case STATE_CT_WAKEUP:
                 battery_check();
-                control_boost_output();
+                // boost_en = 1;
+                // control_boost_output();
+                // boost_en = 0;
                 SystemState_obj.current_state = FLAG_SET;
                 break;
                 
@@ -74,9 +83,15 @@ void main(void)
             case FAULT_TOGGLE:
                 flag_trig();
                 break;
-            
+                
             case BATTERY_LOW:
                 blink_battery_led(5);
+                break;
+            
+            case LED_TEST:
+                blink_battery_led(5);
+                blink_status_led(5);
+                SystemState_obj.current_state = SLEEP;
                 break;
             
             case SLEEP:

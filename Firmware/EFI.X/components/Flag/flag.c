@@ -1,7 +1,7 @@
 #include "flag.h"
 #include "../Declarations/declaration.h"
 
-static bool flag_state = 0;
+static bool flag_state = 1;
 
 /*FLAG SET
 LDRV_1 = 0;

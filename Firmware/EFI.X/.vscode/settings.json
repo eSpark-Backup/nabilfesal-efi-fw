@@ -5,6 +5,7 @@
         "flag.h": "c",
         "led.h": "c",
         "battery.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "sleep.h": "c"
     }
 }

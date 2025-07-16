@@ -25,7 +25,7 @@
     #define V_TARGET_CLEAR  ((BOOST_SUPPLY_R3/BOOST_SUPPLY_EQ) * VREF_SET)
 */
 
-#define V_TARGET_SET    0.69
+#define V_TARGET_SET    0.61
 #define V_TARGET_CLEAR  0.64
 
 
@@ -44,8 +44,8 @@ void pwm_timer_init()
     T2CON = 0b00000101;        // Prescaler 1:4, Timer2 ON (POST = 1:1, PRES = 1:4)
     PIR1bits.TMR2IF = 0;       // Clear interrupt flag
     PIE1bits.TMR2IE = 1;       // Enable Timer2 interrupt
-    INTCONbits.PEIE = 1;       // Enable peripheral interrupts
-    INTCONbits.GIE = 1;        // Enable global interrupts
+    // INTCONbits.PEIE = 1;       // Enable peripheral interrupts
+    // INTCONbits.GIE = 1;        // Enable global interrupts
 
     pwm_state = 0;
     BOOST_PWR = 0;
@@ -56,7 +56,7 @@ void flagdriv_init()
     TRISE0  =   0; // BOOST_PWR
     TRISE1  =   1; // BOOST_FB1
     TRISE2  =   0; // BOOST_FB2
-    
+
     BOOST_PWR = 0;
     BOOST_FB2 = 0;
 }
@@ -91,7 +91,6 @@ bool control_boost_output()
     BOOST_FB2 = 0;
     static float pwm_duty = 0;
     static float integral = 0;
-    static bool flag_state = true;
     
     if(!one_shot)
     {
@@ -118,25 +117,12 @@ bool control_boost_output()
         }
         else
         {
+            blink_battery_led(5);
+            set_pwm_duty(0);
+            __delay_ms(100);
+            BOOST_PWR = 0;
             break;
         }
     }
     
 }
-
-// void __interrupt() isr()
-// {
-//     if (PIR1bits.TMR1IF) {
-//         PIR1bits.TMR1IF = 0;
-
-//         if (pwm_state == 0) {
-//             BOOST_PWR = 1;
-//             TMR1 = (unsigned short)(65536UL - on_time_ticks);
-//             pwm_state = 1;
-//         } else {
-//             BOOST_PWR = 0;
-//             TMR1 = (unsigned short)(65536UL - off_time_ticks);
-//             pwm_state = 0;
-//         }
-//     }
-// }

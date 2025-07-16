@@ -12,7 +12,7 @@ void button_init()
 
 void handle_pwm_interupt()
 {
-    if (pwm_state == 0)
+    if (pwm_state == 0 && boost_en)
     {
         BOOST_PWR = 1;
         TMR2 = 0;
@@ -45,27 +45,28 @@ void handle_ct_wakeup()
 
 void __interrupt() isr()
 {
-    // -------- TIMER1: Software PWM --------
-    if (PIR1bits.TMR1IF) {
-        PIR1bits.TMR1IF = 0;
+    // -------- TIMER2: Software PWM --------
+    if (PIR1bits.TMR2IF) {
+        PIR1bits.TMR2IF = 0;
         handle_pwm_interupt();
     }
+
 
     // -------- INT0: TEST_RST (RB0) --------
     if (INTCONbits.INTF) {
         INTCONbits.INTF = 0;
-        handle_test_rst();
+        if (PORTBbits.RB0 == 0) {
+            handle_test_rst();
+        }
     }
 
     // -------- IOC: EXT_WAKEUP (RB3) & CT_WAKEUP (RB4) --------
     if (INTCONbits.RBIF) {
         INTCONbits.RBIF = 0;
-
         if (PORTBbits.RB3 == 0) {
             handle_ext_wakeup();
         }
-        
-        if (PORTBbits.RB4 == 0) {
+        if (PORTBbits.RB4 == 1) {
             handle_ct_wakeup();
         }
     }
