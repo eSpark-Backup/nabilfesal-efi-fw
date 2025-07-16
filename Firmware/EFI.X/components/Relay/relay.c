@@ -1,16 +1,13 @@
 #include "relay.h"
-#include "../Battery/battery.h"
 #include "../Declarations/declaration.h"
-
-// static bool rly_state = 0;
 
 void relay_init()
 {
     TRISD4 = 0;   // Relay SET output
     TRISD5 = 0;   // Relay RESET output
     
-    RLY_SET = 0;
-    RLY_RST = 0;
+    RLY_SET = CLEAR;
+    RLY_RST = CLEAR;
 }
 
 void relay_trig(bool state)

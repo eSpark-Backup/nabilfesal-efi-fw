@@ -77,7 +77,7 @@ void main(void)
                 break;
             
             case FAULT:
-                blink_status_led(5);
+                blink_status_led(1);
                 break;
                 
             case FAULT_TOGGLE:
@@ -85,7 +85,7 @@ void main(void)
                 break;
                 
             case BATTERY_LOW:
-                blink_battery_led(5);
+                blink_battery_led(1);
                 break;
             
             case LED_TEST:

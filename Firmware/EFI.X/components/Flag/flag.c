@@ -18,8 +18,8 @@ void flag_init()
     TRISB1  = 0;
     TRISB2  = 0;
     
-    LDRV_1 = 0;
-    LDRV_2 = 0;
+    LDRV_1 = CLEAR;
+    LDRV_2 = CLEAR;
 }
 
 void flag_trig()
@@ -27,8 +27,8 @@ void flag_trig()
     LDRV_1 = flag_state;
     LDRV_2 = !flag_state;
     __delay_ms(500);
-    LDRV_1 = 0;
-    LDRV_2 = 0;
+    LDRV_1 = CLEAR;
+    LDRV_2 = CLEAR;
     
     if(!flag_state)
     {

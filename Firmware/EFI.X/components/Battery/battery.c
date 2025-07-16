@@ -13,7 +13,7 @@ void battery_init()
     TRISB5 = 1;   // Battery sense as input
     TRISA5 = 0;   // Battery Load
     
-    BATT_LOAD = 0;
+    BATT_LOAD = CLEAR;
 }
 
 void delay_5ms_with_timer0()
@@ -33,7 +33,7 @@ void delay_5ms_with_timer0()
     {
         if(!BATT_LOW_SNS)
         {
-            batteryLow =1;
+            batteryLow = SET;
             break;
         }
     }
@@ -50,13 +50,13 @@ void battery_check()
 
 void battery_test()
 {   
-    BATT_LOAD = 1;
+    BATT_LOAD = SET;
     delay_5ms_with_timer0();
-    BATT_LOAD = 0;
+    BATT_LOAD = CLEAR;
     if(batteryLow)
     {
         SystemState_obj.current_state = BATTERY_LOW;
-        batteryLow = 0;
+        batteryLow = CLEAR;
     }
     else
     {
