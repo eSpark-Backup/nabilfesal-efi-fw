@@ -23,6 +23,7 @@ void sleep_init()
             
 void sleep_func()
 {
+    CONFIG_SW_COM = CLEAR;
     // Disable all timers
     // INTCONbits.TMR0IE = 0;
     // T1CONbits.TMR1ON = 0;

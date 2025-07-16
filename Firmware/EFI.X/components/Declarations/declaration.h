@@ -16,6 +16,13 @@
 
 #define BOOST_FB1       RE1
 
+#define RMT_CNT_SW      RD3
+#define RST_TIME_1      RD2
+#define RST_TIME_2      RD1
+#define IN_RSH_CRNT     RD0
+#define RSP_DELAY_1     RC3
+#define RSP_DELAY_2     RC2
+
 /********OUTPUT********/
 #define LAMP            RA0
 #define STAT_LED        RA4
@@ -30,6 +37,8 @@
 
 #define BOOST_PWR       RE0
 #define BOOST_FB2       RE2
+
+#define CONFIG_SW_COM   RC4
 
 /********WAKEUP********/
 #define TEST_RST        RB0
@@ -48,7 +57,6 @@ typedef enum {
     FAULT,
     FAULT_TOGGLE,
     BATTERY_LOW,
-    LED_TEST,
     SLEEP
 } SystemState_t;
 

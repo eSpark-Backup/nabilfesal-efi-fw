@@ -8,6 +8,22 @@ void button_init()
     TRISB0 = 1;   // Test Switch input
     TRISB3 = 1;   // External Reset input
     TRISB4 = 1;   // CT Wakeup
+
+    /*DIP Switch Configuration*/
+    TRISC4 = 1;
+    TRISD0 = 0;
+    TRISD1 = 0;
+    TRISD2 = 0;
+    TRISD3 = 0;
+    TRISC2 = 0;
+    TRISC3 = 0;
+
+    RMT_CNT_SW  = CLEAR;
+    RST_TIME_1  = CLEAR;
+    RST_TIME_2  = CLEAR;
+    IN_RSH_CRNT = CLEAR;
+    RSP_DELAY_1 = CLEAR;
+    RSP_DELAY_2 = CLEAR;
 }
 
 void handle_pwm_interupt()
@@ -26,6 +42,15 @@ void handle_pwm_interupt()
         PR2 = off_time_ticks / 2; // Convert ticks back to µs
         pwm_state = 0;
     }
+}
+
+unsigned long get_time_ms()
+{
+    unsigned long t;
+    INTCONbits.GIE = 0;
+    t = timer0_ms;
+    INTCONbits.GIE = 1;
+    return t;
 }
 
 void handle_test_rst()
@@ -50,8 +75,13 @@ void __interrupt() isr()
         PIR1bits.TMR2IF = 0;
         handle_pwm_interupt();
     }
-
-
+    // -------- TIMER1: INTERRUPT --------
+    if (INTCONbits.TMR0IF)
+    {
+        TMR0 = 240;
+        timer0_ms++;
+        INTCONbits.TMR0IF = 0;
+    }
     // -------- INT0: TEST_RST (RB0) --------
     if (INTCONbits.INTF) {
         INTCONbits.INTF = 0;

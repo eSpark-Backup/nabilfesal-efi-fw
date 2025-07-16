@@ -1,6 +1,6 @@
 #include "../Declarations/declaration.h"
 
-#define TIMER1_DELAY_S     100
+#define TIMER1_DELAY_S  100
 
 void led_init()
 {
@@ -16,10 +16,11 @@ void led_init()
     STAT_LED = 0;
 }
 
-void timer1_delay_ms(unsigned int delay_ms) {
+void timer1_delay_ms(unsigned int delay_ms)
+{
     while (delay_ms--)
     {
-        // Each ms = ~4.096 ticks ? use 4 ticks = ~976 µs (close enough to 1ms)
+        // Each ms = ~4.096 ticks ? use 4 ticks = ~976 ï¿½s (close enough to 1ms)
         // 65536 - 4 = 65532 = 0xFFFC
         TMR1H = 0xFF;
         TMR1L = 0xFC;
@@ -33,10 +34,8 @@ void blink_battery_led(unsigned char time)
     for(int i=1; i<=time; i++)
     {
         BATT_LED = 1;
-        // __delay_ms(100);
         timer1_delay_ms(TIMER1_DELAY_S);
         BATT_LED = 0;
-        // __delay_ms(100);
         timer1_delay_ms(TIMER1_DELAY_S);
     }
 }
@@ -46,10 +45,8 @@ void blink_status_led(unsigned char time)
     for(int i=1; i<=time; i++)
     {
         STAT_LED = 1;
-        // __delay_ms(100);
         timer1_delay_ms(TIMER1_DELAY_S);
         STAT_LED = 0;
-        // __delay_ms(100);
         timer1_delay_ms(TIMER1_DELAY_S);
     }
 }

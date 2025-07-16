@@ -16,7 +16,7 @@
 #pragma config WRT = OFF
 
 volatile StateMachine_t SystemState_obj = {
-    .current_state = LED_TEST
+    .current_state = STARTUP_CYCLE
 };
 
 void main(void)
@@ -45,17 +45,16 @@ void main(void)
                 // boost_en = 1;
                 // control_boost_output();
                 // boost_en = 0;
-                flag_trig();
+                SystemState_obj.current_state = FLAG_RESET;
                 break;
                 
             case STATE_TEST_RESET:
             case STATE_EXT_WAKEUP:
-                SystemState_obj.current_state = LED_TEST;
-                // battery_check();
+                battery_check();
                 // boost_en = 1;
                 // control_boost_output();
                 // boost_en = 0;
-                // SystemState_obj.current_state = FAULT_TOGGLE;
+                SystemState_obj.current_state = FAULT_TOGGLE;
                 break;
                 
             case STATE_CT_WAKEUP:
@@ -68,30 +67,34 @@ void main(void)
                 
             case FLAG_SET:
                 relay_trig(SET);
-                flag_trig();
+                flag_set();
                 break;
                 
             case FLAG_RESET:
                 relay_trig(CLEAR);
-                flag_trig();
+                flag_reset();
                 break;
             
             case FAULT:
                 blink_status_led(1);
+                RMT_CNT_SW = 1;
+                if(CONFIG_SW_COM)
+                {
+                    unsigned long current_time = get_time_ms();
+                    if(get_time_ms() - current_time > 100)
+                    {
+                        SystemState_obj.current_state = FLAG_RESET;
+                    }
+                }
+                RMT_CNT_SW = 0;
                 break;
                 
             case FAULT_TOGGLE:
-                flag_trig();
+                flag_toggle();
                 break;
                 
             case BATTERY_LOW:
                 blink_battery_led(1);
-                break;
-            
-            case LED_TEST:
-                blink_battery_led(5);
-                blink_status_led(5);
-                SystemState_obj.current_state = SLEEP;
                 break;
             
             case SLEEP:
