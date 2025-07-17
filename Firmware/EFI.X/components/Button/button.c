@@ -9,10 +9,10 @@
 #define RESET_TIME_3    16*3600*1000
 #define RESET_TIME_4    32*3600*1000
 
-#define RESPONSE_TIME_1     50*100
-#define RESPONSE_TIME_2    100*100
-#define RESPONSE_TIME_3    150*100
-#define RESPONSE_TIME_4    200*100
+#define RESPONSE_TIME_1     50
+#define RESPONSE_TIME_2    100
+#define RESPONSE_TIME_3    150
+#define RESPONSE_TIME_4    200
 
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
