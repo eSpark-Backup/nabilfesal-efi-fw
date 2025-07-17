@@ -1,6 +1,32 @@
 #include "button.h"
+#include <string.h>
 #include "../Flag/flag.h"
+#include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
+
+#define RESET_TIME_1    4*3600*1000
+#define RESET_TIME_2    8*3600*1000
+#define RESET_TIME_3    16*3600*1000
+#define RESET_TIME_4    32*3600*1000
+
+#define RESPONSE_TIME_1     50*100
+#define RESPONSE_TIME_2    100*100
+#define RESPONSE_TIME_3    150*100
+#define RESPONSE_TIME_4    200*100
+
+#define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
+    do { \
+        tris_bit = 0; \
+        pin = 1; \
+        __delay_ms(1); \
+        dip_sw_config_obj.sw_member = CONFIG_SW_COM ? SET : CLEAR; \
+        pin = 0; \
+        __delay_ms(1); \
+        tris_bit = 1; \
+    } while(0)
+
+unsigned long current_time_rst = 0;
+dip_sw_config_t dip_sw_config_obj;
 
 void button_init()
 {
@@ -11,19 +37,122 @@ void button_init()
 
     /*DIP Switch Configuration*/
     TRISC4 = 1;
-    TRISD0 = 0;
-    TRISD1 = 0;
-    TRISD2 = 0;
-    TRISD3 = 0;
-    TRISC2 = 0;
-    TRISC3 = 0;
+    TRISD0 = 1;
+    TRISD1 = 1;
+    TRISD2 = 1;
+    TRISD3 = 1;
+    TRISC2 = 1;
+    TRISC3 = 1;
 
-    RMT_CNT_SW  = CLEAR;
-    RST_TIME_1  = CLEAR;
-    RST_TIME_2  = CLEAR;
-    IN_RSH_CRNT = CLEAR;
-    RSP_DELAY_1 = CLEAR;
-    RSP_DELAY_2 = CLEAR;
+    memset(&dip_sw_config_obj, 0, sizeof(dip_sw_config_obj));
+}
+
+unsigned long get_time_ms()
+{
+    unsigned long t;
+    INTCONbits.GIE = 0;
+    t = timer0_ms;
+    INTCONbits.GIE = 1;
+    return t;
+}
+
+void dp3_remote_contact()
+{
+    if(dip_sw_config_obj.sw1)
+    {
+        unsigned long current_time = get_time_ms();
+        while (get_time_ms() - current_time < 100)
+        {
+            NOP();
+        }
+        relay_trig(CLEAR);
+    }
+}
+
+void dp3_rst_time()
+{
+    if (!one_time_rst)
+    {
+        current_time_rst = get_time_ms();
+        ++one_time_rst;
+    }
+    
+    if(!dip_sw_config_obj.sw2 && !dip_sw_config_obj.sw3)
+    {
+        if(get_time_ms() - current_time_rst >= RESET_TIME_1)
+        {
+            SystemState_obj.current_state = FLAG_RESET;
+        }
+    }
+    else if(!dip_sw_config_obj.sw2 && dip_sw_config_obj.sw3)
+    {
+        if(get_time_ms() - current_time_rst >= RESET_TIME_2)
+        {
+            SystemState_obj.current_state = FLAG_RESET;
+        }
+    }
+    else if(dip_sw_config_obj.sw2 && !dip_sw_config_obj.sw3)
+    {
+        if(get_time_ms() - current_time_rst >= RESET_TIME_3)
+        {
+            SystemState_obj.current_state = FLAG_RESET;
+        }
+    }
+    else if(dip_sw_config_obj.sw2 && dip_sw_config_obj.sw3)
+    {
+        if(get_time_ms() - current_time_rst >= RESET_TIME_4)
+        {
+            SystemState_obj.current_state = FLAG_RESET;
+        }
+    }
+}
+
+void dp3_response_delay()
+{
+    if (!one_time_rsp)
+    {
+        current_time_rst = get_time_ms();
+        ++one_time_rsp;
+    }
+
+    if(!dip_sw_config_obj.sw5 && !dip_sw_config_obj.sw6)
+    {
+        while(get_time_ms() - current_time_rst < RESPONSE_TIME_1)
+        {
+            NOP();
+        }
+    }
+    else if(!dip_sw_config_obj.sw5 && dip_sw_config_obj.sw6)
+    {
+        while(get_time_ms() - current_time_rst < RESPONSE_TIME_2)
+        {
+            NOP();
+        }
+    }
+    else if(dip_sw_config_obj.sw5 && !dip_sw_config_obj.sw6)
+    {
+        while(get_time_ms() - current_time_rst < RESPONSE_TIME_3)
+        {
+            NOP();
+        }
+    }
+    else if(dip_sw_config_obj.sw5 && dip_sw_config_obj.sw6)
+    {
+        while(get_time_ms() - current_time_rst < RESPONSE_TIME_4)
+        {
+            NOP();
+        }
+    }
+}
+
+void dip3_config()
+{
+    READ_CONFIG_SWITCH(RMT_CNT_SW, TRISD3, sw1);
+    READ_CONFIG_SWITCH(RST_TIME_1, TRISD2, sw2);
+    READ_CONFIG_SWITCH(RST_TIME_2, TRISD1, sw3);
+    READ_CONFIG_SWITCH(IN_RSH_CRNT, TRISD0, sw4);
+    READ_CONFIG_SWITCH(RSP_DELAY_1, TRISC3, sw5);
+    READ_CONFIG_SWITCH(RSP_DELAY_2, TRISC2, sw6);
 }
 
 void handle_pwm_interupt()
@@ -42,15 +171,6 @@ void handle_pwm_interupt()
         PR2 = off_time_ticks / 2; // Convert ticks back to µs
         pwm_state = 0;
     }
-}
-
-unsigned long get_time_ms()
-{
-    unsigned long t;
-    INTCONbits.GIE = 0;
-    t = timer0_ms;
-    INTCONbits.GIE = 1;
-    return t;
 }
 
 void handle_test_rst()

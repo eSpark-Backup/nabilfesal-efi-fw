@@ -34,7 +34,7 @@ void main(void)
 
     PORTA = 0; 
     PORTD = 0;
-
+    
     while (1)
     {
        switch (SystemState_obj.current_state)
@@ -45,27 +45,34 @@ void main(void)
                 // boost_en = 1;
                 // control_boost_output();
                 // boost_en = 0;
+                dip3_config();
                 SystemState_obj.current_state = FLAG_RESET;
                 break;
                 
             case STATE_TEST_RESET:
             case STATE_EXT_WAKEUP:
+                one_time_rst = 0;
                 battery_check();
                 // boost_en = 1;
                 // control_boost_output();
                 // boost_en = 0;
+                dip3_config();
                 SystemState_obj.current_state = FAULT_TOGGLE;
                 break;
                 
             case STATE_CT_WAKEUP:
+                one_time_rst = 0;
                 battery_check();
                 // boost_en = 1;
                 // control_boost_output();
                 // boost_en = 0;
+                dip3_config();
                 SystemState_obj.current_state = FLAG_SET;
                 break;
                 
             case FLAG_SET:
+                one_time_rsp = 0;
+                dp3_response_delay();
                 relay_trig(SET);
                 flag_set();
                 break;
@@ -77,16 +84,8 @@ void main(void)
             
             case FAULT:
                 blink_status_led(1);
-                RMT_CNT_SW = 1;
-                if(CONFIG_SW_COM)
-                {
-                    unsigned long current_time = get_time_ms();
-                    while (get_time_ms() - current_time < 100)
-                    {
-                    }
-                    SystemState_obj.current_state = FLAG_RESET;
-                }
-                RMT_CNT_SW = 0;
+                dp3_remote_contact();
+                dp3_rst_time();
                 break;
                 
             case FAULT_TOGGLE:

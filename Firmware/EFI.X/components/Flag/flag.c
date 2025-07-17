@@ -47,12 +47,6 @@ void flag_reset()
 
 void flag_toggle()
 {
-    // LDRV_1 = flag_state;
-    // LDRV_2 = !flag_state;
-    // __delay_ms(DELAY);
-    // LDRV_1 = CLEAR;
-    // LDRV_2 = CLEAR;
-    
     if(!flag_state)
     {
         SystemState_obj.current_state = FLAG_SET;
