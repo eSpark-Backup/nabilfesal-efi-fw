@@ -81,10 +81,10 @@ void main(void)
                 if(CONFIG_SW_COM)
                 {
                     unsigned long current_time = get_time_ms();
-                    if(get_time_ms() - current_time > 100)
+                    while (get_time_ms() - current_time < 100)
                     {
-                        SystemState_obj.current_state = FLAG_RESET;
                     }
+                    SystemState_obj.current_state = FLAG_RESET;
                 }
                 RMT_CNT_SW = 0;
                 break;
