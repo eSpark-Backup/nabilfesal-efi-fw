@@ -86,6 +86,7 @@ void main(void)
                 blink_status_led(1);
                 dp3_remote_contact();
                 dp3_rst_time();
+                dc_rst();
                 break;
                 
             case FAULT_TOGGLE:

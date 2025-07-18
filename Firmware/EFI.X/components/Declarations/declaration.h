@@ -16,6 +16,7 @@
 
 #define BOOST_FB1       RE1
 
+#define VDC_110         RA2
 #define RMT_CNT_SW      RD3
 #define RST_TIME_1      RD2
 #define RST_TIME_2      RD1
@@ -39,6 +40,8 @@
 #define BOOST_FB2       RE2
 
 #define CONFIG_SW_COM   RC4
+
+#define RC6_OUTPUT      RC6
 
 /********WAKEUP********/
 #define TEST_RST        RB0

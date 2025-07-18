@@ -4,15 +4,15 @@
 #include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
-#define RESET_TIME_1    4*3600*1000
-#define RESET_TIME_2    8*3600*1000
-#define RESET_TIME_3    16*3600*1000
-#define RESET_TIME_4    32*3600*1000
+#define RESET_TIME_1     4*3600*1000    //  4hrs
+#define RESET_TIME_2     8*3600*1000    //  8hrs
+#define RESET_TIME_3    16*3600*1000    // 16hrs
+#define RESET_TIME_4    32*3600*1000    // 32hrs
 
-#define RESPONSE_TIME_1     50
-#define RESPONSE_TIME_2    100
-#define RESPONSE_TIME_3    150
-#define RESPONSE_TIME_4    200
+#define RESPONSE_TIME_1     50          //  50ms
+#define RESPONSE_TIME_2    100          // 100ms
+#define RESPONSE_TIME_3    150          // 150ms
+#define RESPONSE_TIME_4    200          // 200ms
 
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
@@ -34,6 +34,9 @@ void button_init()
     TRISB0 = 1;   // Test Switch input
     TRISB3 = 1;   // External Reset input
     TRISB4 = 1;   // CT Wakeup
+    TRISA2 = 1;   // VDC_110
+    
+    TRISC6 = 0;   // RC6 Output
 
     /*DIP Switch Configuration*/
     TRISC4 = 1;
@@ -44,6 +47,7 @@ void button_init()
     TRISC2 = 1;
     TRISC3 = 1;
 
+    RC6_OUTPUT = CLEAR;
     memset(&dip_sw_config_obj, 0, sizeof(dip_sw_config_obj));
 }
 
@@ -54,6 +58,18 @@ unsigned long get_time_ms()
     t = timer0_ms;
     INTCONbits.GIE = 1;
     return t;
+}
+
+void dc_rst()
+{
+    RC6_OUTPUT = SET;
+    __delay_ms(1);
+    if(!VDC_110)
+    {
+        SystemState_obj.current_state = FLAG_RESET;
+    }
+    RC6_OUTPUT = CLEAR;
+    __delay_ms(1);
 }
 
 void dp3_remote_contact()

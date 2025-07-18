@@ -44,8 +44,6 @@ void pwm_timer_init()
     T2CON = 0b00000101;        // Prescaler 1:4, Timer2 ON (POST = 1:1, PRES = 1:4)
     PIR1bits.TMR2IF = 0;       // Clear interrupt flag
     PIE1bits.TMR2IE = 1;       // Enable Timer2 interrupt
-    // INTCONbits.PEIE = 1;       // Enable peripheral interrupts
-    // INTCONbits.GIE = 1;        // Enable global interrupts
 
     pwm_state = 0;
     BOOST_PWR = 0;
