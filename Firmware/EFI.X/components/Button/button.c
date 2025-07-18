@@ -40,7 +40,7 @@ void button_init()
     
     TRISA7 = 0;   // RA7 Output
     TRISC6 = 0;   // RC6 Output
-
+    
     /*DIP Switch Configuration*/
     TRISC4 = 1;
     TRISD0 = 1;
@@ -49,7 +49,7 @@ void button_init()
     TRISD3 = 1;
     TRISC2 = 1;
     TRISC3 = 1;
-
+    
     RC6_OUTPUT = CLEAR;
     RA7_OUTPUT = CLEAR;
 
@@ -69,20 +69,29 @@ void inrush_current()
 {
     if (dip_sw_config_obj.sw4)
     {
-        RC6_OUTPUT = SET;
+        RA7_OUTPUT = SET;
         __delay_ms(1);
-        if(!AUTO_RST && CT_WAKEUP)
+        if(!VAC_240)
         {
-           unsigned long current_time = get_time_ms();
-            while (get_time_ms() - current_time < 3000)
+            RC6_OUTPUT = SET;
+            __delay_ms(1);
+            if(!AUTO_RST && CT_WAKEUP)
             {
-                NOP();
+            unsigned long current_time = get_time_ms();
+                while (get_time_ms() - current_time < 3000)
+                {
+                    NOP();
+                }
             }
         }
+        
         if(!AUTO_RST && !CT_WAKEUP)
         {
             SystemState_obj.current_state = SLEEP;
         }
+        
+        RA7_OUTPUT = CLEAR;
+        __delay_ms(1);
     }
 }
 
@@ -256,6 +265,7 @@ void __interrupt() isr()
         timer0_ms++;
         INTCONbits.TMR0IF = 0;
     }
+
     // -------- INT0: TEST_RST (RB0) --------
     if (INTCONbits.INTF) {
         INTCONbits.INTF = 0;

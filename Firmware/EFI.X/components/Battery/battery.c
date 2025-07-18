@@ -4,7 +4,15 @@
 #include "../Button/button.h"
 #include "../Declarations/declaration.h"
 
+#define EEPROM_RST_VAL      1080
+#define EEPROM_ADDR_LSB     0x00
+#define EEPROM_ADDR_MSB     0x01
+
+#define BAT_SW_HOLD_TIME     3*1000
+#define IND_MODE_TIME       10*1000
+
 static bool batteryLow = 0;
+static uint16_t event_count = 0;
 
 void battery_init()
 {
@@ -20,6 +28,60 @@ void battery_init()
     INTCONbits.TMR0IF = 0;
     INTCONbits.TMR0IE = 1;
     INTCONbits.GIE = 1;
+}
+
+void event_count_inc()
+{
+    if (event_count_read() >= EEPROM_RST_VAL)
+    {
+        event_count = 0;
+    }
+
+    ++event_count;
+    eeprom_write(EEPROM_ADDR_LSB, (uint8_t)(event_count & 0xFF));
+    eeprom_write(EEPROM_ADDR_MSB, (uint8_t)((event_count >> 8) & 0xFF));
+}
+
+uint16_t event_count_read()
+{
+    uint8_t lsb = eeprom_read(EEPROM_ADDR_LSB);
+    uint8_t msb = eeprom_read(EEPROM_ADDR_MSB);
+    return ((uint16_t)msb << 8) | lsb;
+}
+
+void event_counter_reset()
+{
+    bool press_detected = false;
+    unsigned long press_start = 0;
+    unsigned long current_time = get_time_ms();
+
+    while (get_time_ms() - current_time < IND_MODE_TIME)
+    {
+        if (BATT_SW == 0) // Button pressed
+        {
+            if (!press_detected)
+            {
+                press_start = get_time_ms();
+                press_detected = true;
+            }
+
+            if (get_time_ms() - press_start > BAT_SW_HOLD_TIME)
+            {
+                event_count = 0;
+                eeprom_write(EEPROM_ADDR_LSB, (uint8_t)(event_count & 0xFF));
+                eeprom_write(EEPROM_ADDR_MSB, (uint8_t)((event_count >> 8) & 0xFF));
+                BATT_LED = SET;
+                timer1_delay_ms(3000);
+                BATT_LED = CLEAR;
+                break;
+            }
+        }
+        else
+        {
+            press_detected = false;
+        }
+    }
+    SystemState_obj.current_state = SLEEP;
 }
 
 void battery_check()

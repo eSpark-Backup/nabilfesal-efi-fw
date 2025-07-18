@@ -65,6 +65,7 @@ typedef enum {
     FAULT,
     FAULT_TOGGLE,
     BATTERY_LOW,
+    EVENT_COUNTER_RESET,
     SLEEP
 } SystemState_t;
 

@@ -76,11 +76,13 @@ void main(void)
                 dp3_response_delay();
                 relay_trig(SET);
                 flag_set();
+                event_count_inc();
                 break;
                 
             case FLAG_RESET:
                 relay_trig(CLEAR);
                 flag_reset();
+                event_count_inc();
                 break;
             
             case FAULT:
@@ -97,6 +99,10 @@ void main(void)
                 
             case BATTERY_LOW:
                 blink_battery_led(1);
+                break;
+            
+            case EVENT_COUNTER_RESET:
+                event_counter_reset();
                 break;
             
             case SLEEP:

@@ -6,6 +6,7 @@
         "led.h": "c",
         "battery.h": "c",
         "stdbool.h": "c",
-        "sleep.h": "c"
+        "sleep.h": "c",
+        "relay.h": "c"
     }
 }
