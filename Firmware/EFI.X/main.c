@@ -68,6 +68,7 @@ void main(void)
                 // boost_en = 0;
                 dip3_config();
                 SystemState_obj.current_state = FLAG_SET;
+                inrush_current();
                 break;
                 
             case FLAG_SET:

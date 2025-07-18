@@ -28,6 +28,7 @@ void handle_ext_wakeup();
 void handle_ct_wakeup();
 void dc_rst();
 void vac_rst();
+void inrush_current();
 void dip3_config();
 void dp3_remote_contact();
 void dp3_rst_time();

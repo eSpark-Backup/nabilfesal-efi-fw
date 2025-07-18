@@ -65,6 +65,27 @@ unsigned long get_time_ms()
     return t;
 }
 
+void inrush_current()
+{
+    if (dip_sw_config_obj.sw4)
+    {
+        RC6_OUTPUT = SET;
+        __delay_ms(1);
+        if(!AUTO_RST && CT_WAKEUP)
+        {
+           unsigned long current_time = get_time_ms();
+            while (get_time_ms() - current_time < 3000)
+            {
+                NOP();
+            }
+        }
+        if(!AUTO_RST && !CT_WAKEUP)
+        {
+            SystemState_obj.current_state = SLEEP;
+        }
+    }
+}
+
 void dc_rst()
 {
     RC6_OUTPUT = SET;
