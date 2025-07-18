@@ -35,7 +35,10 @@ void button_init()
     TRISB3 = 1;   // External Reset input
     TRISB4 = 1;   // CT Wakeup
     TRISA2 = 1;   // VDC_110
+    TRISA6 = 1;   // VAC_240
+    TRISA7 = 1;   // Auto Reset
     
+    TRISA7 = 0;   // RA7 Output
     TRISC6 = 0;   // RC6 Output
 
     /*DIP Switch Configuration*/
@@ -48,6 +51,8 @@ void button_init()
     TRISC3 = 1;
 
     RC6_OUTPUT = CLEAR;
+    RA7_OUTPUT = CLEAR;
+
     memset(&dip_sw_config_obj, 0, sizeof(dip_sw_config_obj));
 }
 
@@ -69,6 +74,18 @@ void dc_rst()
         SystemState_obj.current_state = FLAG_RESET;
     }
     RC6_OUTPUT = CLEAR;
+    __delay_ms(1);
+}
+
+void vac_rst()
+{
+    RA7_OUTPUT = SET;
+    __delay_ms(1);
+    if(!VAC_240)
+    {
+        SystemState_obj.current_state = FLAG_RESET;
+    }
+    RA7_OUTPUT = CLEAR;
     __delay_ms(1);
 }
 

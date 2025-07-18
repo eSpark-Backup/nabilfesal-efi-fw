@@ -87,6 +87,7 @@ void main(void)
                 dp3_remote_contact();
                 dp3_rst_time();
                 dc_rst();
+                vac_rst();
                 break;
                 
             case FAULT_TOGGLE:
