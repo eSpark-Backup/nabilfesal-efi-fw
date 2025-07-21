@@ -2,14 +2,16 @@
 #include "battery.h"
 #include "../LED/led.h"
 #include "../Button/button.h"
+#include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
 #define EEPROM_RST_VAL      1080
 #define EEPROM_ADDR_LSB     0x00
 #define EEPROM_ADDR_MSB     0x01
 
-#define BAT_SW_HOLD_TIME     3*1000
-#define IND_MODE_TIME       10*1000
+#define IND_MODE_TIME           10*1000
+#define BAT_TEST_HOLD_TIME      3*1000
+#define COUNTER_RST_HOLD_TIME   5*1000
 
 static bool batteryLow = 0;
 static uint16_t event_count = 0;
@@ -64,18 +66,25 @@ bool event_counter_reset(unsigned long current_time)
                 press_detected = true;
             }
 
-            if (get_time_ms() - press_start > BAT_SW_HOLD_TIME)
+            if (get_time_ms() - press_start > COUNTER_RST_HOLD_TIME)
             {
                 event_count = 0;
                 eeprom_write(EEPROM_ADDR_LSB, (uint8_t)(event_count & 0xFF));
                 eeprom_write(EEPROM_ADDR_MSB, (uint8_t)((event_count >> 8) & 0xFF));
+                relay_trig(CLEAR);
+                flag_reset();
                 BATT_LED = SET;
                 timer1_delay_ms(3000);
                 BATT_LED = CLEAR;
                 break;
             }
+            else if (get_time_ms() - press_start >= BAT_TEST_HOLD_TIME && get_time_ms() - press_start < COUNTER_RST_HOLD_TIME)
+            {
+                battery_test();
+            }
         }
         press_detected = false;
+        return SET;
     }
     else
     {

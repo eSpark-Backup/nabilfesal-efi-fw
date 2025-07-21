@@ -1,6 +1,7 @@
 #ifndef FLAG_DRIVER_H
 #define FLAG_DRIVER_H
 
+void adc_init();
 void flagdriv_init();
 bool control_boost_output();
 void set_pwm_duty(float duty_percent);

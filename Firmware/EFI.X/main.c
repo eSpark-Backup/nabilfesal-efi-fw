@@ -90,14 +90,14 @@ void main(void)
             
             case FAULT:
                 blink_status_led(1);
-                if (test_reset_wakeup)
-                {
-                    test_reset_wakeup = event_counter_reset(current_time);
-                }
                 dp3_remote_contact();
                 dp3_rst_time();
                 dc_rst();
                 // vac_rst();
+                if (test_reset_wakeup)
+                {
+                    test_reset_wakeup = event_counter_reset(current_time);
+                }
                 break;
                 
             case FAULT_TOGGLE:

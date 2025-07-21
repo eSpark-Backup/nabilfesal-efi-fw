@@ -218,24 +218,6 @@ void dip3_config()
     READ_CONFIG_SWITCH(RSP_DELAY_2, TRISC2, sw6);
 }
 
-void handle_pwm_interupt()
-{
-    if (pwm_state == 0 && boost_en)
-    {
-        BOOST_PWR = 1;
-        TMR2 = 0;
-        PR2 = on_time_ticks / 2;  // Convert ticks back to µs (0.5 µs per tick)
-        pwm_state = 1;
-    }
-    else
-    {
-        BOOST_PWR = 0;
-        TMR2 = 0;
-        PR2 = off_time_ticks / 2; // Convert ticks back to µs
-        pwm_state = 0;
-    }
-}
-
 void handle_test_rst()
 {
     SystemState_obj.current_state = STATE_TEST_RESET;
@@ -253,11 +235,6 @@ void handle_ct_wakeup()
 
 void __interrupt() isr()
 {
-    // -------- TIMER2: Software PWM --------
-    if (PIR1bits.TMR2IF) {
-        PIR1bits.TMR2IF = 0;
-        handle_pwm_interupt();
-    }
     // -------- TIMER1: INTERRUPT --------
     if (INTCONbits.TMR0IF)
     {

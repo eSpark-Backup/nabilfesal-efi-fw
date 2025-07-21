@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 
-volatile bool pwm_state = 0;
 volatile unsigned long timer0_ms = 0;
 volatile unsigned int on_time_ticks = 0;
 volatile unsigned int off_time_ticks = 0;
