@@ -15,13 +15,14 @@
 #pragma config BOR4V = BOR40V
 #pragma config WRT = OFF
 
+static bool test_reset_wakeup = CLEAR;
 volatile StateMachine_t SystemState_obj = {
     .current_state = STARTUP_CYCLE
 };
 
 void main(void)
 {
-    ANSEL = 0;
+    ANSEL = CLEAR;
     ANSELH = 0b00000001;
     
     led_init();
@@ -32,8 +33,8 @@ void main(void)
     battery_init();
     flagdriv_init();
 
-    PORTA = 0; 
-    PORTD = 0;
+    PORTA = CLEAR; 
+    PORTD = CLEAR;
     
     while (1)
     {
@@ -50,6 +51,8 @@ void main(void)
                 break;
                 
             case STATE_TEST_RESET:
+                test_reset_wakeup = SET;
+                unsigned long current_time = get_time_ms();
             case STATE_EXT_WAKEUP:
                 one_time_rst = 0;
                 battery_check();
@@ -87,10 +90,14 @@ void main(void)
             
             case FAULT:
                 blink_status_led(1);
+                if (test_reset_wakeup)
+                {
+                    test_reset_wakeup = event_counter_reset(current_time);
+                }
                 dp3_remote_contact();
                 dp3_rst_time();
                 dc_rst();
-                vac_rst();
+                // vac_rst();
                 break;
                 
             case FAULT_TOGGLE:
@@ -99,10 +106,6 @@ void main(void)
                 
             case BATTERY_LOW:
                 blink_battery_led(1);
-                break;
-            
-            case EVENT_COUNTER_RESET:
-                event_counter_reset();
                 break;
             
             case SLEEP:

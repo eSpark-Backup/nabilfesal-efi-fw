@@ -34,7 +34,7 @@ void event_count_inc()
 {
     if (event_count_read() >= EEPROM_RST_VAL)
     {
-        event_count = 0;
+        SystemState_obj.current_state = BATTERY_LOW;
     }
 
     ++event_count;
@@ -49,15 +49,14 @@ uint16_t event_count_read()
     return ((uint16_t)msb << 8) | lsb;
 }
 
-void event_counter_reset()
+bool event_counter_reset(unsigned long current_time)
 {
     bool press_detected = false;
     unsigned long press_start = 0;
-    unsigned long current_time = get_time_ms();
 
-    while (get_time_ms() - current_time < IND_MODE_TIME)
+    if (get_time_ms() - current_time < IND_MODE_TIME)
     {
-        if (BATT_SW == 0) // Button pressed
+        while (BATT_SW == 0) // Button pressed
         {
             if (!press_detected)
             {
@@ -76,12 +75,12 @@ void event_counter_reset()
                 break;
             }
         }
-        else
-        {
-            press_detected = false;
-        }
+        press_detected = false;
     }
-    SystemState_obj.current_state = SLEEP;
+    else
+    {
+        return CLEAR;
+    }
 }
 
 void battery_check()

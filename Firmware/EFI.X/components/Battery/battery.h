@@ -8,7 +8,7 @@ void battery_test();
 void battery_ind();
 void battery_check();
 void event_count_inc();
-void event_counter_reset();
+bool event_counter_reset(unsigned long current_time);
 uint16_t event_count_read();
 
 #endif /* BATTERY_H */
