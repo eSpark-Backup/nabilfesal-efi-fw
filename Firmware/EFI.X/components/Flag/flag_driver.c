@@ -10,6 +10,7 @@
 #define KI   10.0      // More = better stability, too high = slow or unstable
 #define DT   0.01      // 10ms loop time
 
+#define ADC_CHANNEL 6
 #define VREF_SET    3.7
 #define VREF_CLEAR  3.6
 #define RESOLUTION  1023.0 
@@ -52,16 +53,14 @@ void set_pwm_duty(float duty_percent)
     if (duty_percent > PWM_CLAMP_H) duty_percent = PWM_CLAMP_H;
     if (duty_percent < PWM_CLAMP_L) duty_percent = PWM_CLAMP_L;
 
-    const unsigned int period_us = 5;  // 1 cycle = 51 �s
+    const unsigned int period_us = 5;
     float on_time = (duty_percent / 100.0) * period_us;
     float off_time = period_us - on_time;
     
     unsigned long now = get_time_ms();
-    STAT_LED = SET;
     BOOST_PWR = SET;
     while ((float)(get_time_ms() - now) < on_time);
 
-    STAT_LED = CLEAR;
     BOOST_PWR = CLEAR;
     while ((float)(get_time_ms() - now) < (on_time + off_time));
 }

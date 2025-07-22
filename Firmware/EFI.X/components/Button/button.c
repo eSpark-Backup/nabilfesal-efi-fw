@@ -25,6 +25,8 @@
         tris_bit = 1; \
     } while(0)
 
+static uint8_t rst_count = 3;
+
 unsigned long current_time_rst = 0;
 dip_sw_config_t dip_sw_config_obj;
 
@@ -36,7 +38,7 @@ void button_init()
     TRISB4 = 1;   // CT Wakeup
     TRISA2 = 1;   // VDC_110
     TRISA6 = 1;   // VAC_240
-    TRISA7 = 1;   // Auto Reset
+//    TRISA7 = 1;   // Auto Reset
     
     TRISA7 = 0;   // RA7 Output
     TRISC6 = 0;   // RC6 Output
@@ -77,7 +79,7 @@ void inrush_current()
             __delay_ms(1);
             if(!AUTO_RST && CT_WAKEUP)
             {
-            unsigned long current_time = get_time_ms();
+                unsigned long current_time = get_time_ms();
                 while (get_time_ms() - current_time < 3000)
                 {
                     NOP();
@@ -98,25 +100,33 @@ void inrush_current()
 void dc_rst()
 {
     RC6_OUTPUT = SET;
-    __delay_ms(1);
+    __delay_us(1);
     if(!VDC_110)
     {
         SystemState_obj.current_state = FLAG_RESET;
     }
     RC6_OUTPUT = CLEAR;
-    __delay_ms(1);
+    __delay_us(1);
 }
 
 void vac_rst()
 {
     RA7_OUTPUT = SET;
-    __delay_ms(1);
-    if(!VAC_240)
+    __delay_us(1);
+    RC6_OUTPUT = SET;
+    __delay_us(1);
+    if(!VAC_240 && !AUTO_RST)
     {
-        SystemState_obj.current_state = FLAG_RESET;
+        --rst_count;
+        if(!rst_count)
+        {
+            SystemState_obj.current_state = FLAG_RESET;
+        }
     }
     RA7_OUTPUT = CLEAR;
-    __delay_ms(1);
+    __delay_us(1);
+    RC6_OUTPUT = CLEAR;
+    __delay_us(1);
 }
 
 void dp3_remote_contact()

@@ -1,6 +1,7 @@
 #include "../Declarations/declaration.h"
 
-#define TIMER1_DELAY_S  100
+#define TIMER1_DELAY_ON_MS     10
+#define TIMER1_DELAY_OFF_MS   990
 
 void led_init()
 {
@@ -34,9 +35,9 @@ void blink_battery_led(unsigned char time)
     for(int i=1; i<=time; i++)
     {
         BATT_LED = 1;
-        timer1_delay_ms(TIMER1_DELAY_S);
+        timer1_delay_ms(TIMER1_DELAY_ON_MS);
         BATT_LED = 0;
-        timer1_delay_ms(TIMER1_DELAY_S);
+        timer1_delay_ms(TIMER1_DELAY_OFF_MS);
     }
 }
 
@@ -45,9 +46,9 @@ void blink_status_led(unsigned char time)
     for(int i=1; i<=time; i++)
     {
         STAT_LED = 1;
-        timer1_delay_ms(TIMER1_DELAY_S);
+        timer1_delay_ms(TIMER1_DELAY_ON_MS);
         STAT_LED = 0;
-        timer1_delay_ms(TIMER1_DELAY_S);
+        timer1_delay_ms(TIMER1_DELAY_OFF_MS);
     }
 }
 

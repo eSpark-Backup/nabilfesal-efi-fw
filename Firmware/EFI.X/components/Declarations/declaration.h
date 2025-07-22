@@ -45,7 +45,7 @@
 
 #define CONFIG_SW_COM   RC4
 
-#define RA7_OUTPUT      RA6
+#define RA7_OUTPUT      RA7
 #define RC6_OUTPUT      RC6
 
 /********WAKEUP********/
@@ -65,7 +65,6 @@ typedef enum {
     FAULT,
     FAULT_TOGGLE,
     BATTERY_LOW,
-    EVENT_COUNTER_RESET,
     SLEEP
 } SystemState_t;
 

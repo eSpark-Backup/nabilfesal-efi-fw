@@ -43,9 +43,9 @@ void main(void)
             case STARTUP_CYCLE:
                 __delay_ms(500);
                 battery_test();
-                // boost_en = 1;
-                // control_boost_output();
-                // boost_en = 0;
+//                boost_en = 1;
+//                control_boost_output();
+//                boost_en = 0;
                 dip3_config();
                 SystemState_obj.current_state = FLAG_RESET;
                 break;
@@ -56,9 +56,9 @@ void main(void)
             case STATE_EXT_WAKEUP:
                 one_time_rst = 0;
                 battery_check();
-                // boost_en = 1;
-                // control_boost_output();
-                // boost_en = 0;
+//                boost_en = 1;
+//                control_boost_output();
+//                boost_en = 0;
                 dip3_config();
                 SystemState_obj.current_state = FAULT_TOGGLE;
                 break;
@@ -66,9 +66,9 @@ void main(void)
             case STATE_CT_WAKEUP:
                 one_time_rst = 0;
                 battery_check();
-                // boost_en = 1;
-                // control_boost_output();
-                // boost_en = 0;
+//                boost_en = 1;
+//                control_boost_output();
+//                boost_en = 0;
                 dip3_config();
                 SystemState_obj.current_state = FLAG_SET;
                 inrush_current();
@@ -93,7 +93,7 @@ void main(void)
                 dp3_remote_contact();
                 dp3_rst_time();
                 dc_rst();
-                // vac_rst();
+                vac_rst();
                 if (test_reset_wakeup)
                 {
                     test_reset_wakeup = event_counter_reset(current_time);

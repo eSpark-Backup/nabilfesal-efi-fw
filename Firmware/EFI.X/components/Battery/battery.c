@@ -3,11 +3,12 @@
 #include "../LED/led.h"
 #include "../Button/button.h"
 #include "../Relay/relay.h"
+#include "../Flag/flag.h"
 #include "../Declarations/declaration.h"
 
-#define EEPROM_RST_VAL      1080
-#define EEPROM_ADDR_LSB     0x00
-#define EEPROM_ADDR_MSB     0x01
+#define EEPROM_RST_VAL           1080
+#define EEPROM_ADDR_LSB          0x00
+#define EEPROM_ADDR_MSB          0x01
 
 #define IND_MODE_TIME           10*1000
 #define BAT_TEST_HOLD_TIME      3*1000
