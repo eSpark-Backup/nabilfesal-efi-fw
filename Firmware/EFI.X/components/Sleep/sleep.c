@@ -24,7 +24,6 @@ void sleep_init()
 void sleep_func()
 {
     CONFIG_SW_COM = CLEAR;
-    // __delay_ms(200);
     BOOST_PWR = 0;
     SLEEP();
     NOP();  // Safety after wake-up

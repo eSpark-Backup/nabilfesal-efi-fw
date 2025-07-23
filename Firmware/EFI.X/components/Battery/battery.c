@@ -10,9 +10,9 @@
 #define EEPROM_ADDR_LSB          0x00
 #define EEPROM_ADDR_MSB          0x01
 
-#define IND_MODE_TIME           10*1000
-#define BAT_TEST_HOLD_TIME      3*1000
-#define COUNTER_RST_HOLD_TIME   5*1000
+#define IND_MODE_TIME           10*1000*1000
+#define BAT_TEST_HOLD_TIME      3*1000*1000
+#define COUNTER_RST_HOLD_TIME   5*1000*1000
 
 static bool batteryLow = 0;
 static uint16_t event_count = 0;
@@ -25,7 +25,7 @@ void battery_init()
     BATT_LOAD = CLEAR;
     OPTION_REGbits.T0CS = 0;   // Internal instruction cycle
     OPTION_REGbits.PSA = 0;
-    OPTION_REGbits.PS = 0b101; // Prescaler 1:64
+    OPTION_REGbits.PS = 0b000; // Prescaler 1:64
     
     TMR0 = 240;                // Preload for ~1ms overflow
     INTCONbits.TMR0IF = 0;
@@ -57,17 +57,17 @@ bool event_counter_reset(unsigned long current_time)
     bool press_detected = false;
     unsigned long press_start = 0;
 
-    if (get_time_ms() - current_time < IND_MODE_TIME)
+    if (get_time_us() - current_time < IND_MODE_TIME)
     {
         while (BATT_SW == 0) // Button pressed
         {
             if (!press_detected)
             {
-                press_start = get_time_ms();
+                press_start = get_time_us();
                 press_detected = true;
             }
 
-            if (get_time_ms() - press_start > COUNTER_RST_HOLD_TIME)
+            if (get_time_us() - press_start > COUNTER_RST_HOLD_TIME)
             {
                 event_count = 0;
                 eeprom_write(EEPROM_ADDR_LSB, (uint8_t)(event_count & 0xFF));
@@ -79,7 +79,7 @@ bool event_counter_reset(unsigned long current_time)
                 BATT_LED = CLEAR;
                 break;
             }
-            else if (get_time_ms() - press_start >= BAT_TEST_HOLD_TIME && get_time_ms() - press_start < COUNTER_RST_HOLD_TIME)
+            else if (get_time_us() - press_start >= BAT_TEST_HOLD_TIME && get_time_us() - press_start < COUNTER_RST_HOLD_TIME)
             {
                 battery_test();
             }
@@ -104,8 +104,8 @@ void battery_check()
 void battery_test()
 {   
     BATT_LOAD = SET;
-    unsigned long start = get_time_ms();
-    while (get_time_ms() - start < 5)
+    unsigned long start = get_time_us();
+    while (get_time_us() - start < 5*1000)
     {
         if(!BATT_LOW_SNS)
         {

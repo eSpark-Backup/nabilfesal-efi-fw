@@ -9,14 +9,14 @@
 #define KP   150.0     // More = faster response, too high = overshoot
 #define KI   10.0      // More = better stability, too high = slow or unstable
 #define DT   0.01      // 10ms loop time
+#define PWM_CLAMP_L   0.00
+#define PWM_CLAMP_H   30.0
 
 #define ADC_CHANNEL 6
 #define VREF_SET    3.7
-#define VREF_CLEAR  3.6
+#define VREF_CLEAR  3.6 //3.6
 #define RESOLUTION  1023.0 
 
-#define PWM_CLAMP_L   0.00
-#define PWM_CLAMP_H   25.0
 /*
     #define BOOST_SUPPLY_R2             220
     #define BOOST_SUPPLY_R3             47.0
@@ -25,11 +25,8 @@
     #define V_TARGET_CLEAR  ((BOOST_SUPPLY_R3/BOOST_SUPPLY_EQ) * VREF_SET)
 */
 
-#define V_TARGET_SET    0.4 //0.65131
+#define V_TARGET_SET    0.6 //0.65131
 #define V_TARGET_CLEAR  0.64
-
-static bool one_shot = false;
-static bool pwm_state = CLEAR;
 
 void adc_init()
 {
@@ -53,16 +50,16 @@ void set_pwm_duty(float duty_percent)
     if (duty_percent > PWM_CLAMP_H) duty_percent = PWM_CLAMP_H;
     if (duty_percent < PWM_CLAMP_L) duty_percent = PWM_CLAMP_L;
 
-    const unsigned int period_us = 5;
+    const unsigned int period_us = 50;
     float on_time = (duty_percent / 100.0) * period_us;
     float off_time = period_us - on_time;
     
-    unsigned long now = get_time_ms();
+    unsigned long now = get_time_us();
     BOOST_PWR = SET;
-    while ((float)(get_time_ms() - now) < on_time);
+    while ((float)(get_time_us() - now) < on_time);
 
     BOOST_PWR = CLEAR;
-    while ((float)(get_time_ms() - now) < (on_time + off_time));
+    while ((float)(get_time_us() - now) < (on_time + off_time));
 }
 
 float read_ADC_voltage(unsigned char channel)
@@ -81,6 +78,7 @@ bool control_boost_output()
 {
     BOOST_FB2 = 0;
     BOOST_PWR = 0;
+
     static float pwm_duty = 0;
     static float integral = 0;
     
@@ -96,14 +94,14 @@ bool control_boost_output()
             float output = (KP * error) + (KI * integral);
     
             if (output > PWM_CLAMP_H) output = PWM_CLAMP_H;
-            if (output < PWM_CLAMP_L) output = PWM_CLAMP_H;
+            if (output < PWM_CLAMP_L) output = PWM_CLAMP_L;
             pwm_duty = output;
             set_pwm_duty(pwm_duty);
         }
         else
         {
             set_pwm_duty(0);
-            __delay_us(500);
+            __delay_us(100);
             BOOST_PWR = 0;
             break;
         }

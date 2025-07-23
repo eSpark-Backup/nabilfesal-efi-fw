@@ -25,6 +25,7 @@ void main(void)
     ANSEL = CLEAR;
     ANSELH = 0b00000001;
     
+    adc_init();
     led_init();
     flag_init();
     relay_init();
@@ -43,33 +44,33 @@ void main(void)
             case STARTUP_CYCLE:
                 __delay_ms(500);
                 battery_test();
-//                boost_en = 1;
-//                control_boost_output();
-//                boost_en = 0;
                 dip3_config();
+                boost_en = 1;
+                control_boost_output();
+                boost_en = 0;
                 SystemState_obj.current_state = FLAG_RESET;
                 break;
                 
             case STATE_TEST_RESET:
                 test_reset_wakeup = SET;
-                unsigned long current_time = get_time_ms();
+                unsigned long current_time = get_time_us();
             case STATE_EXT_WAKEUP:
                 one_time_rst = 0;
                 battery_check();
-//                boost_en = 1;
-//                control_boost_output();
-//                boost_en = 0;
                 dip3_config();
+                boost_en = 1;
+                control_boost_output();
+                boost_en = 0;
                 SystemState_obj.current_state = FAULT_TOGGLE;
                 break;
                 
             case STATE_CT_WAKEUP:
                 one_time_rst = 0;
                 battery_check();
-//                boost_en = 1;
-//                control_boost_output();
-//                boost_en = 0;
                 dip3_config();
+                boost_en = 1;
+                control_boost_output();
+                boost_en = 0;
                 SystemState_obj.current_state = FLAG_SET;
                 inrush_current();
                 break;

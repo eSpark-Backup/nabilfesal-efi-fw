@@ -4,15 +4,15 @@
 #include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
-#define RESET_TIME_1     4*3600*1000    //  4hrs
-#define RESET_TIME_2     8*3600*1000    //  8hrs
-#define RESET_TIME_3    16*3600*1000    // 16hrs
-#define RESET_TIME_4    32*3600*1000    // 32hrs
+#define RESET_TIME_1     4*3600*1000*1000    //  4hrs
+#define RESET_TIME_2     8*3600*1000*1000    //  8hrs
+#define RESET_TIME_3    16*3600*1000*1000    // 16hrs
+#define RESET_TIME_4    32*3600*1000*1000    // 32hrs
 
-#define RESPONSE_TIME_1     50          //  50ms
-#define RESPONSE_TIME_2    100          // 100ms
-#define RESPONSE_TIME_3    150          // 150ms
-#define RESPONSE_TIME_4    200          // 200ms
+#define RESPONSE_TIME_1     50*1000          //  50ms
+#define RESPONSE_TIME_2    100*1000          // 100ms
+#define RESPONSE_TIME_3    150*1000          // 150ms
+#define RESPONSE_TIME_4    200*1000          // 200ms
 
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
@@ -38,7 +38,6 @@ void button_init()
     TRISB4 = 1;   // CT Wakeup
     TRISA2 = 1;   // VDC_110
     TRISA6 = 1;   // VAC_240
-//    TRISA7 = 1;   // Auto Reset
     
     TRISA7 = 0;   // RA7 Output
     TRISC6 = 0;   // RC6 Output
@@ -58,13 +57,19 @@ void button_init()
     memset(&dip_sw_config_obj, 0, sizeof(dip_sw_config_obj));
 }
 
-unsigned long get_time_ms()
+unsigned long get_time_us() 
 {
-    unsigned long t;
-    INTCONbits.GIE = 0;
-    t = timer0_ms;
-    INTCONbits.GIE = 1;
-    return t;
+    unsigned long t1, t2;
+    uint8_t tmr;
+
+    do {
+        INTCONbits.GIE = 0;
+        t1 = timer0_us;
+        tmr = TMR0;
+        t2 = timer0_us;
+        INTCONbits.GIE = 1;
+    } while (t1 != t2);
+    return t1 + (tmr - 240) * 2;
 }
 
 void inrush_current()
@@ -79,8 +84,8 @@ void inrush_current()
             __delay_ms(1);
             if(!AUTO_RST && CT_WAKEUP)
             {
-                unsigned long current_time = get_time_ms();
-                while (get_time_ms() - current_time < 3000)
+                unsigned long current_time = get_time_us();
+                while (get_time_us() - current_time < 3*1000*1000)
                 {
                     NOP();
                 }
@@ -133,8 +138,8 @@ void dp3_remote_contact()
 {
     if(dip_sw_config_obj.sw1)
     {
-        unsigned long current_time = get_time_ms();
-        while (get_time_ms() - current_time < 100)
+        unsigned long current_time = get_time_us();
+        while (get_time_us() - current_time < 100*1000)
         {
             NOP();
         }
@@ -146,34 +151,34 @@ void dp3_rst_time()
 {
     if (!one_time_rst)
     {
-        current_time_rst = get_time_ms();
+        current_time_rst = get_time_us();
         ++one_time_rst;
     }
     
     if(!dip_sw_config_obj.sw2 && !dip_sw_config_obj.sw3)
     {
-        if(get_time_ms() - current_time_rst >= RESET_TIME_1)
+        if(get_time_us() - current_time_rst >= RESET_TIME_1)
         {
             SystemState_obj.current_state = FLAG_RESET;
         }
     }
     else if(!dip_sw_config_obj.sw2 && dip_sw_config_obj.sw3)
     {
-        if(get_time_ms() - current_time_rst >= RESET_TIME_2)
+        if(get_time_us() - current_time_rst >= RESET_TIME_2)
         {
             SystemState_obj.current_state = FLAG_RESET;
         }
     }
     else if(dip_sw_config_obj.sw2 && !dip_sw_config_obj.sw3)
     {
-        if(get_time_ms() - current_time_rst >= RESET_TIME_3)
+        if(get_time_us() - current_time_rst >= RESET_TIME_3)
         {
             SystemState_obj.current_state = FLAG_RESET;
         }
     }
     else if(dip_sw_config_obj.sw2 && dip_sw_config_obj.sw3)
     {
-        if(get_time_ms() - current_time_rst >= RESET_TIME_4)
+        if(get_time_us() - current_time_rst >= RESET_TIME_4)
         {
             SystemState_obj.current_state = FLAG_RESET;
         }
@@ -184,34 +189,34 @@ void dp3_response_delay()
 {
     if (!one_time_rsp)
     {
-        current_time_rst = get_time_ms();
+        current_time_rst = get_time_us();
         ++one_time_rsp;
     }
 
     if(!dip_sw_config_obj.sw5 && !dip_sw_config_obj.sw6)
     {
-        while(get_time_ms() - current_time_rst < RESPONSE_TIME_1)
+        while(get_time_us() - current_time_rst < RESPONSE_TIME_1)
         {
             NOP();
         }
     }
     else if(!dip_sw_config_obj.sw5 && dip_sw_config_obj.sw6)
     {
-        while(get_time_ms() - current_time_rst < RESPONSE_TIME_2)
+        while(get_time_us() - current_time_rst < RESPONSE_TIME_2)
         {
             NOP();
         }
     }
     else if(dip_sw_config_obj.sw5 && !dip_sw_config_obj.sw6)
     {
-        while(get_time_ms() - current_time_rst < RESPONSE_TIME_3)
+        while(get_time_us() - current_time_rst < RESPONSE_TIME_3)
         {
             NOP();
         }
     }
     else if(dip_sw_config_obj.sw5 && dip_sw_config_obj.sw6)
     {
-        while(get_time_ms() - current_time_rst < RESPONSE_TIME_4)
+        while(get_time_us() - current_time_rst < RESPONSE_TIME_4)
         {
             NOP();
         }
@@ -248,8 +253,7 @@ void __interrupt() isr()
     // -------- TIMER1: INTERRUPT --------
     if (INTCONbits.TMR0IF)
     {
-        TMR0 = 240;
-        timer0_ms++;
+        timer0_us += 32;
         INTCONbits.TMR0IF = 0;
     }
 

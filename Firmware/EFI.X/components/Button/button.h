@@ -3,9 +3,7 @@
 
 #include <stdbool.h>
 
-volatile unsigned long timer0_ms = 0;
-volatile unsigned int on_time_ticks = 0;
-volatile unsigned int off_time_ticks = 0;
+volatile unsigned long timer0_us = 0;
 
 bool one_time_rst = 0;
 bool one_time_rsp = 0;
@@ -32,6 +30,6 @@ void dip3_config();
 void dp3_remote_contact();
 void dp3_rst_time();
 void dp3_response_delay();
-unsigned long get_time_ms();
+unsigned long get_time_us();
 
 #endif /* BUTTON_H */
