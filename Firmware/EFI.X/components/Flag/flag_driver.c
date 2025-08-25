@@ -51,15 +51,15 @@ void set_pwm_duty(float duty_percent)
     if (duty_percent < PWM_CLAMP_L) duty_percent = PWM_CLAMP_L;
 
     const unsigned int period_us = 50;
-    float on_time = (duty_percent / 100.0) * period_us;
-    float off_time = period_us - on_time;
+    unsigned long on_time = ((duty_percent / 100.0) * period_us)/2;
+    unsigned long off_time = (period_us - on_time)/2;
     
     unsigned long now = get_time_us();
     BOOST_PWR = SET;
-    while ((float)(get_time_us() - now) < on_time);
+    while ((get_time_us() - now) < on_time);
 
     BOOST_PWR = CLEAR;
-    while ((float)(get_time_us() - now) < (on_time + off_time));
+    while ((get_time_us() - now) < (on_time + off_time));
 }
 
 float read_ADC_voltage(unsigned char channel)

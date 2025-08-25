@@ -51,9 +51,3 @@ void blink_status_led(unsigned char time)
         timer1_delay_ms(TIMER1_DELAY_OFF_MS);
     }
 }
-
-void led_off()
-{
-    BATT_LED = 0;
-    STAT_LED = 0;
-}

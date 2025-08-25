@@ -10,9 +10,8 @@
 #define EEPROM_ADDR_LSB          0x00
 #define EEPROM_ADDR_MSB          0x01
 
-#define IND_MODE_TIME           10*1000*1000
-#define BAT_TEST_HOLD_TIME      3*1000*1000
-#define COUNTER_RST_HOLD_TIME   5*1000*1000
+#define IND_MODE_TIME           (10UL*1000UL*1000UL)/2
+#define COUNTER_RST_HOLD_TIME   (5UL*1000UL*1000UL)/2
 
 static bool batteryLow = 0;
 static uint16_t event_count = 0;
@@ -79,10 +78,6 @@ bool event_counter_reset(unsigned long current_time)
                 BATT_LED = CLEAR;
                 break;
             }
-            else if (get_time_us() - press_start >= BAT_TEST_HOLD_TIME && get_time_us() - press_start < COUNTER_RST_HOLD_TIME)
-            {
-                battery_test();
-            }
         }
         press_detected = false;
         return SET;
@@ -105,7 +100,7 @@ void battery_test()
 {   
     BATT_LOAD = SET;
     unsigned long start = get_time_us();
-    while (get_time_us() - start < 5*1000)
+    while (get_time_us() - start < ((5UL*1000UL)/2))
     {
         if(!BATT_LOW_SNS)
         {

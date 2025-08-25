@@ -4,15 +4,15 @@
 #include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
-#define RESET_TIME_1     4*3600*1000*1000    //  4hrs
-#define RESET_TIME_2     8*3600*1000*1000    //  8hrs
-#define RESET_TIME_3    16*3600*1000*1000    // 16hrs
-#define RESET_TIME_4    32*3600*1000*1000    // 32hrs
+#define RESET_TIME_1    ( 4UL*3600UL*1000UL*1000UL)/2    //  4hrs
+#define RESET_TIME_2    ( 8UL*3600UL*1000UL*1000UL)/2    //  8hrs
+#define RESET_TIME_3    (16UL*3600UL*1000UL*1000UL)/2    // 16hrs
+#define RESET_TIME_4    (32UL*3600UL*1000UL*1000UL)/2    // 32hrs
 
-#define RESPONSE_TIME_1     50*1000          //  50ms
-#define RESPONSE_TIME_2    100*1000          // 100ms
-#define RESPONSE_TIME_3    150*1000          // 150ms
-#define RESPONSE_TIME_4    200*1000          // 200ms
+#define RESPONSE_TIME_1     (50UL*1000UL)/2              //  50ms
+#define RESPONSE_TIME_2    (100UL*1000UL)/2              // 100ms
+#define RESPONSE_TIME_3    (150UL*1000UL)/2              // 150ms
+#define RESPONSE_TIME_4    (200UL*1000UL)/2              // 200ms
 
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
@@ -26,7 +26,6 @@
     } while(0)
 
 static uint8_t rst_count = 3;
-
 unsigned long current_time_rst = 0;
 dip_sw_config_t dip_sw_config_obj;
 
@@ -57,19 +56,20 @@ void button_init()
     memset(&dip_sw_config_obj, 0, sizeof(dip_sw_config_obj));
 }
 
-unsigned long get_time_us() 
+unsigned long get_time_us(void) 
 {
     unsigned long t1, t2;
     uint8_t tmr;
 
     do {
-        INTCONbits.GIE = 0;
+        INTCONbits.GIE = 0;   // disable interrupts
         t1 = timer0_us;
         tmr = TMR0;
         t2 = timer0_us;
         INTCONbits.GIE = 1;
     } while (t1 != t2);
-    return t1 + (tmr - 240) * 2;
+
+    return (t1 + (unsigned long)tmr);  // full microseconds
 }
 
 void inrush_current()
@@ -85,7 +85,7 @@ void inrush_current()
             if(!AUTO_RST && CT_WAKEUP)
             {
                 unsigned long current_time = get_time_us();
-                while (get_time_us() - current_time < 3*1000*1000)
+                while (get_time_us() - current_time < ((3UL*1000UL*1000UL)/2))
                 {
                     NOP();
                 }
@@ -139,7 +139,7 @@ void dp3_remote_contact()
     if(dip_sw_config_obj.sw1)
     {
         unsigned long current_time = get_time_us();
-        while (get_time_us() - current_time < 100*1000)
+        while (get_time_us() - current_time < ((100UL*1000UL)/2))
         {
             NOP();
         }
@@ -253,7 +253,7 @@ void __interrupt() isr()
     // -------- TIMER1: INTERRUPT --------
     if (INTCONbits.TMR0IF)
     {
-        timer0_us += 32;
+        timer0_us += 256;
         INTCONbits.TMR0IF = 0;
     }
 
