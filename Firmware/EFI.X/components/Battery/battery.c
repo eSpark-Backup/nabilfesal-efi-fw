@@ -116,6 +116,7 @@ void battery_test()
     }
     else
     {
-        blink_battery_led(1);
+        blink_battery_led(5);
+        SystemState_obj.current_state = SLEEP;
     }
 }

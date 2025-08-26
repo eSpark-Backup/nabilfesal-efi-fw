@@ -46,8 +46,13 @@ void blink_status_led(unsigned char time)
     for(int i=1; i<=time; i++)
     {
         STAT_LED = 1;
+        if(!BATT_LOW_SNS)
+        {
+            BATT_LED = 1;
+        }
         timer1_delay_ms(TIMER1_DELAY_ON_MS);
         STAT_LED = 0;
+        BATT_LED = 0;
         timer1_delay_ms(TIMER1_DELAY_OFF_MS);
     }
 }

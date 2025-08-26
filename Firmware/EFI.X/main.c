@@ -46,7 +46,6 @@ void main(void)
         {
         case STARTUP_CYCLE:
             __delay_ms(500);
-            battery_test();
             dip3_config();
             boost_en = 1;
             control_boost_output();
@@ -55,9 +54,9 @@ void main(void)
             break;
 
         case STATE_TEST_RESET:
-            TMR0 = 0;   // reset Timer0 register
-            TMR0IF = 0; // clear interrupt flag
-            TMR0IE = 1; // re-enable interrupt if you?re using it
+            TMR0 = 0;  
+            TMR0IF = 0;
+            TMR0IE = 1;
             test_reset_wakeup = SET;
             current_time = get_time_us();
             while (!TEST_RST)
@@ -71,7 +70,6 @@ void main(void)
 
         case STATE_EXT_WAKEUP:
             one_time_rst = 0;
-            battery_check();
             dip3_config();
             boost_en = 1;
             control_boost_output();
@@ -81,7 +79,6 @@ void main(void)
 
         case STATE_CT_WAKEUP:
             one_time_rst = 0;
-            battery_check();
             dip3_config();
             boost_en = 1;
             control_boost_output();
