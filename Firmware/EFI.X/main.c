@@ -118,7 +118,8 @@ void main(void)
             break;
 
         case BATTERY_LOW:
-            blink_battery_led(1);
+            blink_battery_led(5);
+            SystemState_obj.current_state = SLEEP;
             break;
 
         case SLEEP:

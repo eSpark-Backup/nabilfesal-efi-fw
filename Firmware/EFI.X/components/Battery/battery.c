@@ -94,6 +94,10 @@ void battery_check()
     {
         SystemState_obj.current_state = BATTERY_LOW;
     }
+    else
+    {
+        blink_battery_led(1);
+    }
 }
 
 void battery_test()
@@ -116,7 +120,6 @@ void battery_test()
     }
     else
     {
-        blink_battery_led(5);
-        SystemState_obj.current_state = SLEEP;
+        blink_battery_led(1);
     }
 }
