@@ -32,6 +32,13 @@ void battery_init()
     INTCONbits.GIE = 1;
 }
 
+uint16_t event_count_read()
+{
+    uint8_t lsb = eeprom_read(EEPROM_ADDR_LSB);
+    uint8_t msb = eeprom_read(EEPROM_ADDR_MSB);
+    return ((uint16_t)msb << 8) | lsb;
+}
+
 void event_count_inc()
 {
     if (event_count_read() >= EEPROM_RST_VAL)
@@ -42,13 +49,6 @@ void event_count_inc()
     ++event_count;
     eeprom_write(EEPROM_ADDR_LSB, (uint8_t)(event_count & 0xFF));
     eeprom_write(EEPROM_ADDR_MSB, (uint8_t)((event_count >> 8) & 0xFF));
-}
-
-uint16_t event_count_read()
-{
-    uint8_t lsb = eeprom_read(EEPROM_ADDR_LSB);
-    uint8_t msb = eeprom_read(EEPROM_ADDR_MSB);
-    return ((uint16_t)msb << 8) | lsb;
 }
 
 bool event_counter_reset(unsigned long current_time)
@@ -85,18 +85,6 @@ bool event_counter_reset(unsigned long current_time)
     else
     {
         return CLEAR;
-    }
-}
-
-void battery_check()
-{
-    if(!BATT_LOW_SNS)
-    {
-        SystemState_obj.current_state = BATTERY_LOW;
-    }
-    else
-    {
-        blink_battery_led(1);
     }
 }
 

@@ -65,7 +65,8 @@ typedef enum {
     FAULT,
     FAULT_TOGGLE,
     BATTERY_LOW,
-    SLEEP
+    SLEEP,
+    HELLO
 } SystemState_t;
 
 typedef struct {

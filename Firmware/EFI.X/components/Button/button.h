@@ -19,17 +19,17 @@ typedef struct {
 
 extern dip_sw_config_t dip_sw_config_obj;
 
-void button_init();
+void button_init(void);
 void handle_test_rst();
 void handle_ext_wakeup();
 void handle_ct_wakeup();
-void dc_rst();
-void vac_rst();
-void inrush_current();
-void dip3_config();
-void dp3_remote_contact();
-void dp3_rst_time();
-void dp3_response_delay();
-unsigned long get_time_us();
+void dc_rst(void);
+void vac_rst(void);
+void inrush_current(void);
+void dip3_config(void);
+void dp3_remote_contact(void);
+void dp3_rst_time(void);
+void dp3_response_delay(void);
+unsigned long get_time_us(void);
 
 #endif /* BUTTON_H */

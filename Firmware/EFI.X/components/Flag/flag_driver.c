@@ -25,7 +25,7 @@
     #define V_TARGET_CLEAR  ((BOOST_SUPPLY_R3/BOOST_SUPPLY_EQ) * VREF_SET)
 */
 
-#define V_TARGET_SET    0.6 //0.65131
+#define V_TARGET_SET    0.5 //0.65131
 #define V_TARGET_CLEAR  0.64
 
 void adc_init()
@@ -51,8 +51,8 @@ void set_pwm_duty(float duty_percent)
     if (duty_percent < PWM_CLAMP_L) duty_percent = PWM_CLAMP_L;
 
     const unsigned int period_us = 50;
-    unsigned long on_time = ((duty_percent / 100.0) * period_us)/2;
-    unsigned long off_time = (period_us - on_time)/2;
+    unsigned long on_time = ((duty_percent / 100.0) * period_us);
+    unsigned long off_time = (period_us - on_time);
     
     unsigned long now = get_time_us();
     BOOST_PWR = SET;

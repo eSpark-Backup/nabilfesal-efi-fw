@@ -3,11 +3,9 @@
 
 #include <stdint.h>
 
-void battery_init();
-void battery_test();
-void battery_ind();
-void battery_check();
-void event_count_inc();
+void battery_init(void);
+void battery_test(void);
+void event_count_inc(void);
 bool event_counter_reset(unsigned long current_time);
 uint16_t event_count_read();
 

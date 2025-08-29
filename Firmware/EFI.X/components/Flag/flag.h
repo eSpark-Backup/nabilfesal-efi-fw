@@ -3,9 +3,9 @@
 
 #include <stdbool.h>
 
-void flag_init();
-void flag_set();
-void flag_reset();
-void flag_toggle();
+void flag_init(void);
+void flag_set(void);
+void flag_reset(void);
+void flag_toggle(void);
 
 #endif /* FLAG_H */
