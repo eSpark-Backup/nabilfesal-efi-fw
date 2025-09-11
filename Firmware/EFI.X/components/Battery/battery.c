@@ -11,7 +11,7 @@
 #define EEPROM_ADDR_MSB          0x01
 
 #define IND_MODE_TIME           (10UL*1000UL*1000UL)/2
-#define COUNTER_RST_HOLD_TIME   (5UL*1000UL*1000UL)/2
+#define COUNTER_RST_HOLD_TIME   (4UL*1000UL*1000UL)/2
 
 static bool batteryLow = 0;
 static uint16_t event_count = 0;

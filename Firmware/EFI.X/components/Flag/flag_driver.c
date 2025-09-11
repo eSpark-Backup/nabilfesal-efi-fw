@@ -6,16 +6,16 @@
 #include "../Button/button.h"
 #include "../Declarations/declaration.h"
 
-#define KP   150.0     // More = faster response, too high = overshoot
-#define KI   10.0      // More = better stability, too high = slow or unstable
-#define DT   0.01      // 10ms loop time
+#define KP            150.0
+#define KI            10.0 
+#define DT            0.01 
 #define PWM_CLAMP_L   0.00
 #define PWM_CLAMP_H   30.0
 
-#define ADC_CHANNEL 6
-#define VREF_SET    3.7
-#define VREF_CLEAR  3.6 //3.6
-#define RESOLUTION  1023.0 
+#define ADC_CHANNEL    6
+#define VREF_SET       3.7
+#define VREF_CLEAR     3.6 //3.6
+#define RESOLUTION     1023.0 
 
 /*
     #define BOOST_SUPPLY_R2             220
@@ -25,7 +25,7 @@
     #define V_TARGET_CLEAR  ((BOOST_SUPPLY_R3/BOOST_SUPPLY_EQ) * VREF_SET)
 */
 
-#define V_TARGET_SET    0.5 //0.65131
+#define V_TARGET_SET    0.6 //0.65131
 #define V_TARGET_CLEAR  0.64
 
 void adc_init()
@@ -96,7 +96,7 @@ bool control_boost_output()
             if (output > PWM_CLAMP_H) output = PWM_CLAMP_H;
             if (output < PWM_CLAMP_L) output = PWM_CLAMP_L;
             pwm_duty = output;
-            set_pwm_duty(pwm_duty);
+             set_pwm_duty(pwm_duty);
         }
         else
         {

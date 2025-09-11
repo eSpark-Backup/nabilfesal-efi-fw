@@ -23,6 +23,8 @@ void sleep_init()
             
 void sleep_func()
 {
+    TRISA = 0x00; PORTA = 0x00;
+    TRISD = 0x00; PORTD = 0x00;
     CONFIG_SW_COM = CLEAR;
     BOOST_PWR = 0;
     SLEEP();
