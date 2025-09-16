@@ -9,7 +9,7 @@
 
 // CONFIG BITS
 #pragma config FOSC = INTRC_NOCLKOUT
-#pragma config WDTE = OFF, PWRTE = OFF, MCLRE = OFF
+#pragma config WDTE = ON, PWRTE = OFF, MCLRE = OFF
 #pragma config CP = OFF, CPD = OFF, BOREN = OFF, IESO = OFF
 #pragma config FCMEN = OFF, LVP = OFF
 #pragma config BOR4V = BOR40V
@@ -22,7 +22,13 @@ volatile StateMachine_t SystemState_obj = {
     .current_state = STARTUP_CYCLE
 };
 
-void main(void) {
+void main(void) { 
+    
+
+//    SWDTEN = SET;
+    WDTCONbits.WDTPS = 0b1011;  // 1:65536 (needs to be configured)
+
+
     ANSEL = CLEAR;
     ANSELH = 0b00000001;
 
@@ -125,6 +131,9 @@ void main(void) {
 
             default:
                 break;
+               
         }
+        CLRWDT(); //FEED WDt
+
     }
 }
