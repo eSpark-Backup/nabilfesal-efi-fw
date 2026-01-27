@@ -4,15 +4,21 @@
 #include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
-#define RESET_TIME_1    ( 4UL*3600UL*1000UL*1000UL)/2    //  4hrs
-#define RESET_TIME_2    ( 8UL*3600UL*1000UL*1000UL)/2    //  8hrs
-#define RESET_TIME_3    (16UL*3600UL*1000UL*1000UL)/2    // 16hrs
-#define RESET_TIME_4    (32UL*3600UL*1000UL*1000UL)/2    // 32hrs
+// reset time definitions in milliseconds
+#define RESET_TIME_4_HRS    ( 4UL*3600UL*1000UL)             //  4hrs
+#define RESET_TIME_8_HRS    ( 8UL*3600UL*1000UL)             //  8hrs
+#define RESET_TIME_16_HRS   (16UL*3600UL*1000UL)             // 16hrs
+#define RESET_TIME_32_HRS   (32UL*3600UL*1000UL)             // 32hrs
 
-#define RESPONSE_TIME_1     (50UL*1000UL)/2              //  50ms
-#define RESPONSE_TIME_2    (100UL*1000UL)/2              // 100ms
-#define RESPONSE_TIME_3    (150UL*1000UL)/2              // 150ms
-#define RESPONSE_TIME_4    (200UL*1000UL)/2              // 200ms
+#define RESPONSE_TIME_1     (50UL*1000UL)/2                  //  50ms
+#define RESPONSE_TIME_2     (100UL*1000UL)/2                 // 100ms
+#define RESPONSE_TIME_3     (150UL*1000UL)/2                 // 150ms
+#define RESPONSE_TIME_4     (200UL*1000UL)/2                 // 200ms
+
+#define IS_RESET_TIME_4_HRS(config_sw)    (config_sw.sw2 == CLEAR && config_sw.sw3 == CLEAR)
+#define IS_RESET_TIME_8_HRS(config_sw)    (config_sw.sw2 == CLEAR && config_sw.sw3 == SET)
+#define IS_RESET_TIME_16_HRS(config_sw)   (config_sw.sw2 == SET && config_sw.sw3 == CLEAR)
+#define IS_RESET_TIME_32_HRS(config_sw)   (config_sw.sw2 == SET && config_sw.sw3 == SET)
 
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
@@ -149,39 +155,33 @@ void dp3_remote_contact()
 
 void dp3_rst_time()
 {
+    static unsigned long reference_time = RESET_TIME_4_HRS;
+
     if (!one_time_rst)
     {
-        current_time_rst = get_time_us();
         ++one_time_rst;
-    }
-    
-    if(!dip_sw_config_obj.sw2 && !dip_sw_config_obj.sw3)
-    {
-        if(get_time_us() - current_time_rst >= RESET_TIME_1)
+        current_time_rst = US_TO_MS(get_time_us());
+        if(IS_RESET_TIME_4_HRS(dip_sw_config_obj))
         {
-            SystemState_obj.current_state = FLAG_RESET;
+            reference_time = RESET_TIME_4_HRS;
+        }
+        else if(IS_RESET_TIME_8_HRS(dip_sw_config_obj))
+        {
+            reference_time = RESET_TIME_8_HRS;
+        }
+        else if(IS_RESET_TIME_16_HRS(dip_sw_config_obj))
+        {
+            reference_time = RESET_TIME_16_HRS;
+        }
+        else if(IS_RESET_TIME_32_HRS(dip_sw_config_obj))
+        {
+            reference_time = RESET_TIME_32_HRS;
         }
     }
-    else if(!dip_sw_config_obj.sw2 && dip_sw_config_obj.sw3)
+
+    if((US_TO_MS(get_time_us()) - current_time_rst) >= reference_time)
     {
-        if(get_time_us() - current_time_rst >= RESET_TIME_2)
-        {
-            SystemState_obj.current_state = FLAG_RESET;
-        }
-    }
-    else if(dip_sw_config_obj.sw2 && !dip_sw_config_obj.sw3)
-    {
-        if(get_time_us() - current_time_rst >= RESET_TIME_3)
-        {
-            SystemState_obj.current_state = FLAG_RESET;
-        }
-    }
-    else if(dip_sw_config_obj.sw2 && dip_sw_config_obj.sw3)
-    {
-        if(get_time_us() - current_time_rst >= RESET_TIME_4)
-        {
-            SystemState_obj.current_state = FLAG_RESET;
-        }
+        SystemState_obj.current_state = FLAG_RESET;
     }
 }
 

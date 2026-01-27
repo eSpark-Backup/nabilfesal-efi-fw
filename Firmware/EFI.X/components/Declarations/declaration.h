@@ -75,4 +75,7 @@ typedef struct {
 
 extern volatile StateMachine_t SystemState_obj;
 
+#define US_TO_MS(us)    (us / 1000UL)
+#define MS_TO_US(ms)    (ms * 1000UL)
+
 #endif /* DECLARATION_H */
