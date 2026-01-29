@@ -24,7 +24,7 @@ void battery_init()
     BATT_LOAD = CLEAR;
     OPTION_REGbits.T0CS = 0;   // Internal instruction cycle
     OPTION_REGbits.PSA = 0;
-    OPTION_REGbits.PS = 0b000; // Prescaler 1:64
+    OPTION_REGbits.PS = 0b000; // Prescaler 1:2
     
     TMR0 = 240;                // Preload for ~1ms overflow
     INTCONbits.TMR0IF = 0;

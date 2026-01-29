@@ -100,7 +100,14 @@ void main(void) {
                 break;
 
             case FAULT:
-                blink_status_led(1);
+                if(CT_WAKEUP)
+                {
+                    blink_status_led(2);
+                }
+                else
+                {
+                    blink_status_led(1);
+                }
                 dp3_remote_contact();
                 dp3_rst_time();
                 dc_rst();

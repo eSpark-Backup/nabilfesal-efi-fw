@@ -43,7 +43,14 @@ void blink_battery_led(unsigned char time)
 
 void blink_status_led(unsigned char time)
 {
-    for(int i=1; i<=time; i++)
+    if (time == 0)
+        return;
+
+    uint16_t totalTime = TIMER1_DELAY_ON_MS + TIMER1_DELAY_OFF_MS;
+    uint16_t off_gap  = (totalTime / (time*2)) - TIMER1_DELAY_ON_MS;
+    uint16_t final_off = (TIMER1_DELAY_ON_MS * time) + (off_gap * (time + 1));
+
+    for(uint8_t i=1; i<=time; i++)
     {
         STAT_LED = 1;
         if(!BATT_LOW_SNS)
@@ -53,6 +60,14 @@ void blink_status_led(unsigned char time)
         timer1_delay_ms(TIMER1_DELAY_ON_MS);
         STAT_LED = 0;
         BATT_LED = 0;
-        timer1_delay_ms(TIMER1_DELAY_OFF_MS);
+        if (i == time)
+        {
+            // Extended OFF time at the end
+            timer1_delay_ms(final_off);
+        }
+        else
+        {
+            timer1_delay_ms(off_gap);
+        }
     }
 }
