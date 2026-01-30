@@ -3,6 +3,11 @@
 
 #include <stdbool.h>
 
+#define EXT_WAKEUP_RESET_DUR_MIN        (1500UL*1000UL)/2       // 500ms
+#define EXT_WAKEUP_RESET_DUR_MAX        (3500UL*1000UL)/2      // 3.5s
+#define EXT_WAKEUP_SET_DUR_MIN          (5000UL*1000UL)/2      // 5s
+#define EXT_WAKEUP_SET_DUR_MAX          (10000UL*1000UL)/2     // 10s
+
 volatile unsigned long timer0_us = 0;
 
 bool one_time_rst = 0;

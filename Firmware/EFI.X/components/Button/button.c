@@ -5,8 +5,10 @@
 #include "../Declarations/declaration.h"
 
 // reset time definitions in milliseconds
-#define RESET_TIME_4_HRS    ( 4UL*3600UL*1000UL)             //  4hrs
-#define RESET_TIME_8_HRS    ( 8UL*3600UL*1000UL)             //  8hrs
+#define RESET_TIME_4_HRS    ( 10000UL)             //  10secs
+// #define RESET_TIME_4_HRS    ( 4UL*3600UL*1000UL)             //  4hrs
+#define RESET_TIME_8_HRS    ( 20000UL)             //  20secs
+// #define RESET_TIME_8_HRS    ( 8UL*3600UL*1000UL)             //  8hrs
 #define RESET_TIME_16_HRS   (16UL*3600UL*1000UL)             // 16hrs
 #define RESET_TIME_32_HRS   (32UL*3600UL*1000UL)             // 32hrs
 
@@ -100,7 +102,7 @@ void inrush_current()
         
         if(!AUTO_RST && !CT_WAKEUP)
         {
-            SystemState_obj.current_state = SLEEP;
+            update_state_machine_state(SLEEP);
         }
         
         RA7_OUTPUT = CLEAR;
@@ -114,7 +116,7 @@ void dc_rst()
     __delay_us(1);
     if(!VDC_110)
     {
-        SystemState_obj.current_state = FLAG_RESET;
+        update_state_machine_state(FLAG_RESET);
     }
     RC6_OUTPUT = CLEAR;
     __delay_us(1);
@@ -131,7 +133,7 @@ void vac_rst()
         --rst_count;
         if(!rst_count)
         {
-            SystemState_obj.current_state = FLAG_RESET;
+            update_state_machine_state(FLAG_RESET);
         }
     }
     RA7_OUTPUT = CLEAR;
@@ -161,6 +163,7 @@ void dp3_rst_time()
     {
         ++one_time_rst;
         current_time_rst = US_TO_MS(get_time_us());
+
         if(IS_RESET_TIME_4_HRS(dip_sw_config_obj))
         {
             reference_time = RESET_TIME_4_HRS;
@@ -181,7 +184,7 @@ void dp3_rst_time()
 
     if((US_TO_MS(get_time_us()) - current_time_rst) >= reference_time)
     {
-        SystemState_obj.current_state = FLAG_RESET;
+        update_state_machine_state(FLAG_RESET);
     }
 }
 
@@ -235,17 +238,17 @@ void dip3_config()
 
 void handle_test_rst()
 {
-    SystemState_obj.current_state = STATE_TEST_RESET;
+    update_state_machine_state(STATE_TEST_RESET);
 }
 
 void handle_ext_wakeup()
 {
-    SystemState_obj.current_state = STATE_EXT_WAKEUP;
+    update_state_machine_state(STATE_EXT_WAKEUP);
 }
 
 void handle_ct_wakeup()
 {
-    SystemState_obj.current_state = STATE_CT_WAKEUP;
+    update_state_machine_state(STATE_CT_WAKEUP);
 }
 
 void __interrupt() isr()

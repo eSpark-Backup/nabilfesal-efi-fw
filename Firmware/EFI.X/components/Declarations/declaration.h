@@ -70,10 +70,15 @@ typedef enum {
 } SystemState_t;
 
 typedef struct {
+    SystemState_t previous_state;
     SystemState_t current_state;
 } StateMachine_t;
 
 extern volatile StateMachine_t SystemState_obj;
+
+void update_state_machine_state(SystemState_t new_state);
+SystemState_t get_current_state(void);
+SystemState_t get_previous_state(void);
 
 #define US_TO_MS(us)    (us / 1000UL)
 #define MS_TO_US(ms)    (ms * 1000UL)

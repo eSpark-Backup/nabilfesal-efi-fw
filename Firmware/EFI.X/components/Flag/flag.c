@@ -26,7 +26,7 @@ void flag_set()
     LDRV_2 = CLEAR;
     
     flag_state = SET;  //Set
-    SystemState_obj.current_state = FAULT;
+    update_state_machine_state(FAULT);
 }
 
 /*FLAG RESET*/
@@ -42,17 +42,17 @@ void flag_reset()
     LDRV_2 = CLEAR;
     
     flag_state = CLEAR;  //Reset
-    SystemState_obj.current_state = SLEEP;
+    update_state_machine_state(SLEEP);
 }
 
 void flag_toggle()
 {
     if(!flag_state)
     {
-        SystemState_obj.current_state = FLAG_SET;
+        update_state_machine_state(FLAG_SET);
     }
     else
     {
-        SystemState_obj.current_state = FLAG_RESET;
+        update_state_machine_state(FLAG_RESET);
     }
 }

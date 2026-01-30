@@ -43,7 +43,7 @@ void event_count_inc()
 {
     if (event_count_read() >= EEPROM_RST_VAL)
     {
-        SystemState_obj.current_state = BATTERY_LOW;
+        update_state_machine_state(BATTERY_LOW);
     }
 
     ++event_count;
@@ -103,7 +103,7 @@ void battery_test()
     BATT_LOAD = CLEAR;
     if(batteryLow)
     {
-        SystemState_obj.current_state = BATTERY_LOW;
+        update_state_machine_state(BATTERY_LOW);
         batteryLow = CLEAR;
     }
     else

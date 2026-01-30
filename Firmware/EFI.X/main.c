@@ -18,6 +18,7 @@
 #define BAT_TEST_HOLD_TIME (3UL * 1000UL * 1000UL) / 2
 
 static bool test_reset_wakeup = CLEAR;
+static bool ext_wakeup = CLEAR;
 volatile StateMachine_t SystemState_obj = {
     .current_state = STARTUP_CYCLE
 };
@@ -36,6 +37,7 @@ void main(void) {
     flagdriv_init();
 
     unsigned long current_time = 0;
+    unsigned long calculated_time = 0;
 
     PORTA = CLEAR;
     PORTD = CLEAR;
@@ -48,7 +50,7 @@ void main(void) {
                 boost_en = 1;
                 control_boost_output();
                 boost_en = 0;
-                SystemState_obj.current_state = FLAG_RESET;
+                update_state_machine_state(FLAG_RESET);
                 break;
 
             case STATE_TEST_RESET:
@@ -63,14 +65,34 @@ void main(void) {
                         break;
                     }
                 }
-
-            case STATE_EXT_WAKEUP:
                 one_time_rst = 0;
                 dip3_config();
                 boost_en = 1;
                 control_boost_output();
                 boost_en = 0;
-                SystemState_obj.current_state = FAULT_TOGGLE;
+                update_state_machine_state(FAULT_TOGGLE);
+                break;
+
+            case STATE_EXT_WAKEUP:
+                TMR0 = 0;
+                TMR0IF = 0;
+                TMR0IE = 1;
+                current_time = get_time_us();
+                while (!EXT_WAKEUP) {
+                    NOP();
+                }
+                calculated_time = get_time_us() - current_time;        // calculate the button press duration for comparison
+                if ((calculated_time >= EXT_WAKEUP_RESET_DUR_MIN) && (calculated_time <= EXT_WAKEUP_RESET_DUR_MAX)) {
+                    update_state_machine_state(FLAG_RESET);
+                }
+                else if ((calculated_time >= EXT_WAKEUP_SET_DUR_MIN) && (calculated_time <= EXT_WAKEUP_SET_DUR_MAX)) {
+                    update_state_machine_state(FLAG_SET);
+                }
+                else {
+                    update_state_machine_state(get_previous_state());
+                }
+                one_time_rst = 0;
+                dip3_config();
                 break;
 
             case STATE_CT_WAKEUP:
@@ -79,7 +101,7 @@ void main(void) {
                 boost_en = 1;
                 control_boost_output();
                 boost_en = 0;
-                SystemState_obj.current_state = FLAG_SET;
+                update_state_machine_state(FLAG_SET);
                 inrush_current();
                 break;
 
@@ -123,7 +145,7 @@ void main(void) {
 
             case BATTERY_LOW:
                 blink_battery_led(5);
-                SystemState_obj.current_state = SLEEP;
+                update_state_machine_state(SLEEP);
                 break;
 
             case SLEEP:
@@ -134,4 +156,22 @@ void main(void) {
                 break;
         }
     }
+}
+
+void update_state_machine_state(SystemState_t new_state) {
+    if (SystemState_obj.current_state == new_state)
+        return;
+
+    // INTCONbits.GIE = 0;   // disable interrupts
+    SystemState_obj.previous_state = SystemState_obj.current_state;
+    SystemState_obj.current_state = new_state;
+    // INTCONbits.GIE = 1;   // enable interrupts
+}
+
+SystemState_t get_current_state(void) {
+    return SystemState_obj.current_state;
+}
+
+SystemState_t get_previous_state(void) {
+    return SystemState_obj.previous_state;
 }
