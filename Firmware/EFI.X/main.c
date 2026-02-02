@@ -15,7 +15,7 @@
 #pragma config BOR4V = BOR40V
 #pragma config WRT = OFF
 
-#define BAT_TEST_HOLD_TIME (3UL * 1000UL * 1000UL) / 2
+#define BAT_TEST_HOLD_TIME S_TO_US(3)
 
 static bool test_reset_wakeup = CLEAR;
 static bool ext_wakeup = CLEAR;
@@ -54,13 +54,12 @@ void main(void) {
                 break;
 
             case STATE_TEST_RESET:
-                TMR0 = 0;
-                TMR0IF = 0;
-                TMR0IE = 1;
                 test_reset_wakeup = SET;
                 current_time = get_time_us();
+                // SET_GPIO_HIGH(TEST_POINT_2);
                 while (!TEST_RST) {
                     if ((get_time_us() - current_time) > BAT_TEST_HOLD_TIME) {
+                        // SET_GPIO_LOW(TEST_POINT_2);
                         battery_test();
                         break;
                     }
@@ -74,9 +73,6 @@ void main(void) {
                 break;
 
             case STATE_EXT_WAKEUP:
-                TMR0 = 0;
-                TMR0IF = 0;
-                TMR0IE = 1;
                 current_time = get_time_us();
                 while (!EXT_WAKEUP) {
                     NOP();

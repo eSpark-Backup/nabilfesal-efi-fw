@@ -4,18 +4,16 @@
 #include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
-// reset time definitions in milliseconds
-#define RESET_TIME_4_HRS    ( 10000UL)             //  10secs
-// #define RESET_TIME_4_HRS    ( 4UL*3600UL*1000UL)             //  4hrs
-#define RESET_TIME_8_HRS    ( 20000UL)             //  20secs
-// #define RESET_TIME_8_HRS    ( 8UL*3600UL*1000UL)             //  8hrs
-#define RESET_TIME_16_HRS   (16UL*3600UL*1000UL)             // 16hrs
-#define RESET_TIME_32_HRS   (32UL*3600UL*1000UL)             // 32hrs
-
-#define RESPONSE_TIME_1     (50UL*1000UL)/2                  //  50ms
-#define RESPONSE_TIME_2     (100UL*1000UL)/2                 // 100ms
-#define RESPONSE_TIME_3     (150UL*1000UL)/2                 // 150ms
-#define RESPONSE_TIME_4     (200UL*1000UL)/2                 // 200ms
+// reset time definitions in milliseconds?
+// #define RESET_TIME_4_HRS    S_TO_MS(10)             //  10secs
+// #define RESET_TIME_8_HRS    S_TO_MS(20)             //  20secs
+#define RESET_TIME_4_HRS    H_TO_MS(4)             //  4hrs
+#define RESET_TIME_8_HRS    H_TO_MS(8)             //  8hrs
+#define RESET_TIME_16_HRS   H_TO_MS(16)            // 16hrs
+#define RESET_TIME_32_HRS   H_TO_MS(32)            // 32hrs
+#define RESPONSE_TIME_2     MS_TO_US(100)                 // 100ms
+#define RESPONSE_TIME_3     MS_TO_US(150)                 // 150ms
+#define RESPONSE_TIME_4     MS_TO_US(200)                 // 200ms
 
 #define IS_RESET_TIME_4_HRS(config_sw)    (config_sw.sw2 == CLEAR && config_sw.sw3 == CLEAR)
 #define IS_RESET_TIME_8_HRS(config_sw)    (config_sw.sw2 == CLEAR && config_sw.sw3 == SET)
@@ -25,10 +23,10 @@
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
         tris_bit = 0; \
-        pin = 1; \
+        SET_GPIO_HIGH(pin); \
         __delay_ms(1); \
         dip_sw_config_obj.sw_member = CONFIG_SW_COM ? SET : CLEAR; \
-        pin = 0; \
+        SET_GPIO_LOW(pin); \
         __delay_ms(1); \
         tris_bit = 1; \
     } while(0)
@@ -58,10 +56,31 @@ void button_init()
     TRISC2 = 1;
     TRISC3 = 1;
     
-    RC6_OUTPUT = CLEAR;
-    RA7_OUTPUT = CLEAR;
+    SET_GPIO_LOW(RC6_OUTPUT);
+    SET_GPIO_LOW(RA7_OUTPUT);
 
     memset(&dip_sw_config_obj, 0, sizeof(dip_sw_config_obj));
+
+#ifdef ENABLE_TEST_POINTS
+    TRISD6 = 0;   // Output
+    TRISD7 = 0;   // Output
+
+    SET_GPIO_LOW(TEST_POINT_1);
+    SET_GPIO_LOW(TEST_POINT_2);
+#endif
+
+}
+
+void reset_timer0(void)
+{
+    INTCONbits.GIE = CLEAR;
+
+    timer0_us = 0;
+    TMR0 = 0;
+    TMR0IF = CLEAR;
+    TMR0IE = SET;
+
+    INTCONbits.GIE = SET;
 }
 
 unsigned long get_time_us(void) 
@@ -70,30 +89,30 @@ unsigned long get_time_us(void)
     uint8_t tmr;
 
     do {
-        INTCONbits.GIE = 0;   // disable interrupts
+        INTCONbits.GIE = CLEAR;   // disable interrupts
         t1 = timer0_us;
         tmr = TMR0;
         t2 = timer0_us;
-        INTCONbits.GIE = 1;
+        INTCONbits.GIE = SET;
     } while (t1 != t2);
 
-    return (t1 + (unsigned long)tmr);  // full microseconds
+    return (t1 + (unsigned long)(tmr * TMR0_TICK_US));  // full microseconds
 }
 
 void inrush_current()
 {
     if (dip_sw_config_obj.sw4)
     {
-        RA7_OUTPUT = SET;
+        SET_GPIO_HIGH(RA7_OUTPUT);
         __delay_ms(1);
         if(!VAC_240)
         {
-            RC6_OUTPUT = SET;
+            SET_GPIO_HIGH(RC6_OUTPUT);
             __delay_ms(1);
             if(!AUTO_RST && CT_WAKEUP)
             {
                 unsigned long current_time = get_time_us();
-                while (get_time_us() - current_time < ((3UL*1000UL*1000UL)/2))
+                while ((get_time_us() - current_time) < S_TO_US(3))
                 {
                     NOP();
                 }
@@ -104,29 +123,29 @@ void inrush_current()
         {
             update_state_machine_state(SLEEP);
         }
-        
-        RA7_OUTPUT = CLEAR;
+
+        SET_GPIO_LOW(RA7_OUTPUT);
         __delay_ms(1);
     }
 }
 
 void dc_rst()
 {
-    RC6_OUTPUT = SET;
+    SET_GPIO_HIGH(RC6_OUTPUT);
     __delay_us(1);
     if(!VDC_110)
     {
         update_state_machine_state(FLAG_RESET);
     }
-    RC6_OUTPUT = CLEAR;
+    SET_GPIO_LOW(RC6_OUTPUT);
     __delay_us(1);
 }
 
 void vac_rst()
 {
-    RA7_OUTPUT = SET;
+    SET_GPIO_HIGH(RA7_OUTPUT);
     __delay_us(1);
-    RC6_OUTPUT = SET;
+    SET_GPIO_HIGH(RC6_OUTPUT);
     __delay_us(1);
     if(!VAC_240 && !AUTO_RST)
     {
@@ -136,9 +155,9 @@ void vac_rst()
             update_state_machine_state(FLAG_RESET);
         }
     }
-    RA7_OUTPUT = CLEAR;
+    SET_GPIO_LOW(RA7_OUTPUT);
     __delay_us(1);
-    RC6_OUTPUT = CLEAR;
+    SET_GPIO_LOW(RC6_OUTPUT);
     __delay_us(1);
 }
 
@@ -147,7 +166,7 @@ void dp3_remote_contact()
     if(dip_sw_config_obj.sw1)
     {
         unsigned long current_time = get_time_us();
-        while (get_time_us() - current_time < ((100UL*1000UL)/2))
+        while ((get_time_us() - current_time) < MS_TO_US(100))
         {
             NOP();
         }
@@ -188,6 +207,8 @@ void dp3_rst_time()
     }
 }
 
+
+// also change this
 void dp3_response_delay()
 {
     if (!one_time_rsp)
@@ -253,16 +274,17 @@ void handle_ct_wakeup()
 
 void __interrupt() isr()
 {
-    // -------- TIMER1: INTERRUPT --------
+    // -------- TIMER0: INTERRUPT --------
     if (INTCONbits.TMR0IF)
     {
-        timer0_us += 256;
-        INTCONbits.TMR0IF = 0;
+        INTCONbits.TMR0IF = CLEAR;
+        timer0_us += TMR0_OVERFLOW_US;
+        TOGGLE_GPIO(TEST_POINT_1);
     }
 
     // -------- INT0: TEST_RST (RB0) --------
     if (INTCONbits.INTF) {
-        INTCONbits.INTF = 0;
+        INTCONbits.INTF = CLEAR;
         if (PORTBbits.RB0 == 0) {
             handle_test_rst();
         }
@@ -270,7 +292,7 @@ void __interrupt() isr()
 
     // -------- IOC: EXT_WAKEUP (RB3) & CT_WAKEUP (RB4) --------
     if (INTCONbits.RBIF) {
-        INTCONbits.RBIF = 0;
+        INTCONbits.RBIF = CLEAR;
         if (PORTBbits.RB3 == 0) {
             handle_ext_wakeup();
         }

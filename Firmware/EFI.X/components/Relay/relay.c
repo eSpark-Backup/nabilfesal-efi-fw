@@ -7,9 +7,9 @@ void relay_init()
 {
     TRISD4 = 0;   // Relay SET output
     TRISD5 = 0;   // Relay RESET output
-    
-    RLY_SET = CLEAR;
-    RLY_RST = CLEAR;
+
+    SET_GPIO_LOW(RLY_SET);
+    SET_GPIO_LOW(RLY_RST);
 }
 
 void relay_trig(bool state)
@@ -17,16 +17,16 @@ void relay_trig(bool state)
     switch (state)
     {
         case CLEAR:
-            RLY_RST = !CLEAR;
+            SET_GPIO_HIGH(RLY_RST);
             __delay_ms(RELAY_DELAY);
-            RLY_RST = CLEAR;
+            SET_GPIO_LOW(RLY_RST);
             __delay_ms(RELAY_DELAY);
             break;
         case SET:
             // SET relay
-            RLY_SET = SET;
+            SET_GPIO_HIGH(RLY_SET);
             __delay_ms(RELAY_DELAY);
-            RLY_SET = !SET;
+            SET_GPIO_LOW(RLY_SET);
             __delay_ms(RELAY_DELAY);
             break;
     default:
