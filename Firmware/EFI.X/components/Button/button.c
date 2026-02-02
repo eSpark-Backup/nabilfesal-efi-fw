@@ -11,6 +11,8 @@
 #define RESET_TIME_8_HRS    H_TO_MS(8)             //  8hrs
 #define RESET_TIME_16_HRS   H_TO_MS(16)            // 16hrs
 #define RESET_TIME_32_HRS   H_TO_MS(32)            // 32hrs
+
+#define RESPONSE_TIME_1     MS_TO_US(50)                  //  50ms
 #define RESPONSE_TIME_2     MS_TO_US(100)                 // 100ms
 #define RESPONSE_TIME_3     MS_TO_US(150)                 // 150ms
 #define RESPONSE_TIME_4     MS_TO_US(200)                 // 200ms
