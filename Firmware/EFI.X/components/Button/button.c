@@ -5,8 +5,6 @@
 #include "../Declarations/declaration.h"
 
 // reset time definitions in seconds
-// #define RESET_TIME_4_HRS    (10)                  //  10secs
-// #define RESET_TIME_8_HRS    (20)                  //  20secs
 #define RESET_TIME_4_HRS    H_TO_S(4)             //  4hrs
 #define RESET_TIME_8_HRS    H_TO_S(8)             //  8hrs
 #define RESET_TIME_16_HRS   H_TO_S(16)            // 16hrs
@@ -24,6 +22,7 @@
 
 #define READ_CONFIG_SWITCH(pin, tris_bit, sw_member) \
     do { \
+        reset_dip_switches_to_input(); \
         tris_bit = 0; \
         SET_GPIO_HIGH(pin); \
         __delay_ms(1); \
@@ -37,6 +36,18 @@ static uint8_t rst_count = 3;
 unsigned long current_time_rst = 0;
 dip_sw_config_t dip_sw_config_obj;
 
+static void reset_dip_switches_to_input(void)
+{
+    /*DIP Switch Configuration*/
+    TRISC4 = 1;
+    TRISD0 = 1;
+    TRISD1 = 1;
+    TRISD2 = 1;
+    TRISD3 = 1;
+    TRISC2 = 1;
+    TRISC3 = 1;
+}
+
 void button_init()
 {
     TRISC5 = 1;   // Battery Switch input
@@ -48,16 +59,9 @@ void button_init()
     
     TRISA7 = 0;   // RA7 Output
     TRISC6 = 0;   // RC6 Output
-    
-    /*DIP Switch Configuration*/
-    TRISC4 = 1;
-    TRISD0 = 1;
-    TRISD1 = 1;
-    TRISD2 = 1;
-    TRISD3 = 1;
-    TRISC2 = 1;
-    TRISC3 = 1;
-    
+
+    reset_dip_switches_to_input();
+
     SET_GPIO_LOW(RC6_OUTPUT);
     SET_GPIO_LOW(RA7_OUTPUT);
 
@@ -78,6 +82,7 @@ void reset_timer0(void)
     INTCONbits.GIE = CLEAR;
 
     timer0_us = 0;
+    timer0_sec = 0;
     TMR0 = 0;
     TMR0IF = CLEAR;
     TMR0IE = SET;
@@ -290,17 +295,17 @@ void __interrupt() isr()
     if (INTCONbits.TMR0IF)
     {
         INTCONbits.TMR0IF = CLEAR;
-        timer0_us += (TMR0_OVERFLOW_US + 3);          // 3us processing time compensated
+        timer0_us += (TMR0_OVERFLOW_US + 4);          // 4us processing time compensated
 
         /* accumulate toward seconds */
-        us_accumulator += (TMR0_OVERFLOW_US + 3);     // 3us processing time compensated
+        us_accumulator += (TMR0_OVERFLOW_US + 4);     // 4us processing time compensated
         if (us_accumulator >= 1000000UL)
         {
             us_accumulator -= 1000000UL;
             timer0_sec++;
         }
 
-        TOGGLE_GPIO(TEST_POINT_1);
+        // TOGGLE_GPIO(TEST_POINT_1);
     }
 
     // -------- INT0: TEST_RST (RB0) --------
