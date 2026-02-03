@@ -77,7 +77,7 @@ void main(void) {
                 while (!EXT_WAKEUP) {
                     NOP();
                 }
-                calculated_time = get_time_us() - current_time;        // calculate the button press duration for comparison
+                calculated_time = get_time_us() - current_time;        // calculate the ext button press duration for comparison
                 if ((calculated_time >= EXT_WAKEUP_RESET_DUR_MIN) && (calculated_time <= EXT_WAKEUP_RESET_DUR_MAX)) {
                     update_state_machine_state(FLAG_RESET);
                 }

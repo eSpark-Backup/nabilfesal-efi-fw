@@ -4,18 +4,18 @@
 #include "../Relay/relay.h"
 #include "../Declarations/declaration.h"
 
-// reset time definitions in milliseconds?
-// #define RESET_TIME_4_HRS    S_TO_MS(10)             //  10secs
-// #define RESET_TIME_8_HRS    S_TO_MS(20)             //  20secs
-#define RESET_TIME_4_HRS    H_TO_MS(4)             //  4hrs
-#define RESET_TIME_8_HRS    H_TO_MS(8)             //  8hrs
-#define RESET_TIME_16_HRS   H_TO_MS(16)            // 16hrs
-#define RESET_TIME_32_HRS   H_TO_MS(32)            // 32hrs
+// reset time definitions in seconds
+// #define RESET_TIME_4_HRS    (10)                  //  10secs
+// #define RESET_TIME_8_HRS    (20)                  //  20secs
+#define RESET_TIME_4_HRS    H_TO_S(4)             //  4hrs
+#define RESET_TIME_8_HRS    H_TO_S(8)             //  8hrs
+#define RESET_TIME_16_HRS   H_TO_S(16)            // 16hrs
+#define RESET_TIME_32_HRS   H_TO_S(32)            // 32hrs
 
-#define RESPONSE_TIME_1     MS_TO_US(50)                  //  50ms
-#define RESPONSE_TIME_2     MS_TO_US(100)                 // 100ms
-#define RESPONSE_TIME_3     MS_TO_US(150)                 // 150ms
-#define RESPONSE_TIME_4     MS_TO_US(200)                 // 200ms
+#define RESPONSE_TIME_1     MS_TO_US(50)          //  50ms
+#define RESPONSE_TIME_2     MS_TO_US(100)         // 100ms
+#define RESPONSE_TIME_3     MS_TO_US(150)         // 150ms
+#define RESPONSE_TIME_4     MS_TO_US(200)         // 200ms
 
 #define IS_RESET_TIME_4_HRS(config_sw)    (config_sw.sw2 == CLEAR && config_sw.sw3 == CLEAR)
 #define IS_RESET_TIME_8_HRS(config_sw)    (config_sw.sw2 == CLEAR && config_sw.sw3 == SET)
@@ -83,6 +83,11 @@ void reset_timer0(void)
     TMR0IE = SET;
 
     INTCONbits.GIE = SET;
+}
+
+unsigned long get_time_s(void) 
+{
+    return timer0_sec;
 }
 
 unsigned long get_time_us(void) 
@@ -183,7 +188,7 @@ void dp3_rst_time()
     if (!one_time_rst)
     {
         ++one_time_rst;
-        current_time_rst = US_TO_MS(get_time_us());
+        current_time_rst = get_time_s();
 
         if(IS_RESET_TIME_4_HRS(dip_sw_config_obj))
         {
@@ -203,7 +208,7 @@ void dp3_rst_time()
         }
     }
 
-    if((US_TO_MS(get_time_us()) - current_time_rst) >= reference_time)
+    if((get_time_s() - current_time_rst) >= reference_time)
     {
         update_state_machine_state(FLAG_RESET);
     }
@@ -274,13 +279,27 @@ void handle_ct_wakeup()
     update_state_machine_state(STATE_CT_WAKEUP);
 }
 
+
+
+/* private to ISR */
+static uint32_t us_accumulator = 0;
+
 void __interrupt() isr()
 {
     // -------- TIMER0: INTERRUPT --------
     if (INTCONbits.TMR0IF)
     {
         INTCONbits.TMR0IF = CLEAR;
-        timer0_us += TMR0_OVERFLOW_US;
+        timer0_us += (TMR0_OVERFLOW_US + 3);          // 3us processing time compensated
+
+        /* accumulate toward seconds */
+        us_accumulator += (TMR0_OVERFLOW_US + 3);     // 3us processing time compensated
+        if (us_accumulator >= 1000000UL)
+        {
+            us_accumulator -= 1000000UL;
+            timer0_sec++;
+        }
+
         TOGGLE_GPIO(TEST_POINT_1);
     }
 
