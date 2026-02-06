@@ -3,7 +3,13 @@
 
 #include <stdbool.h>
 
+#define EXT_WAKEUP_RESET_DUR_MIN        MS_TO_US(500)       // 500ms
+#define EXT_WAKEUP_RESET_DUR_MAX        MS_TO_US(3500)      // 3.5s
+#define EXT_WAKEUP_SET_DUR_MIN          MS_TO_US(5000)      // 5s
+#define EXT_WAKEUP_SET_DUR_MAX          MS_TO_US(10000)     // 10s
+
 volatile unsigned long timer0_us = 0;
+volatile unsigned long timer0_sec = 0;
 
 bool one_time_rst = 0;
 bool one_time_rsp = 0;
@@ -31,5 +37,8 @@ void dp3_remote_contact(void);
 void dp3_rst_time(void);
 void dp3_response_delay(void);
 unsigned long get_time_us(void);
+unsigned long get_time_s(void);
+
+void reset_timer0(void);
 
 #endif /* BUTTON_H */

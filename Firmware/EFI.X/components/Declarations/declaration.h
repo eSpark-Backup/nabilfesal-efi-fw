@@ -6,9 +6,85 @@
 
 #define _XTAL_FREQ 4000000
 
+#define PRESCALAR_ON_WDT    1
+#define PRESCALAR_ON_TMR    0
+
+#define PRESCALAR_SELECTION PRESCALAR_ON_TMR
+#define TMR0_PRESCALER      0b000   // only used when prescalar on TMR0
+
+// ==================================
+#if (PRESCALAR_SELECTION == PRESCALAR_ON_WDT)
+
+/* Prescaler on WDT → TMR0 has NO prescaler */
+    #define TMR0_TICK_US        1
+    #define TMR0_OVERFLOW_US    256
+
+#elif (PRESCALAR_SELECTION == PRESCALAR_ON_TMR)
+
+    #if   (TMR0_PRESCALER == 0b000)   // 1:2
+        #define TMR0_TICK_US        2
+        #define TMR0_OVERFLOW_US    512
+    #elif (TMR0_PRESCALER == 0b001)   // 1:4
+        #define TMR0_TICK_US        4
+        #define TMR0_OVERFLOW_US    1024
+    #elif (TMR0_PRESCALER == 0b010)   // 1:8
+        #define TMR0_TICK_US        8
+        #define TMR0_OVERFLOW_US    2048
+    #elif (TMR0_PRESCALER == 0b011)   // 1:16
+        #define TMR0_TICK_US        16
+        #define TMR0_OVERFLOW_US    4096
+    #elif (TMR0_PRESCALER == 0b100)   // 1:32
+        #define TMR0_TICK_US        32
+        #define TMR0_OVERFLOW_US    8192
+    #elif (TMR0_PRESCALER == 0b101)   // 1:64
+        #define TMR0_TICK_US        64
+        #define TMR0_OVERFLOW_US    16384
+    #elif (TMR0_PRESCALER == 0b110)   // 1:128
+        #define TMR0_TICK_US        128
+        #define TMR0_OVERFLOW_US    32768
+    #elif (TMR0_PRESCALER == 0b111)   // 1:256
+        #define TMR0_TICK_US        256
+        #define TMR0_OVERFLOW_US    65536
+    #else
+        #error "Invalid TMR0_PRESCALER value"
+    #endif
+
+#else
+    #error "Invalid PRESCALAR_SELECTION"
+#endif
+// ==================================
+
+
+#define US_TO_MS(us)    (us / 1000UL)
+#define MS_TO_US(ms)    (ms * 1000UL)
+#define S_TO_MS(s)      (s * 1000UL)
+#define MS_TO_S(ms)     (ms / 1000UL)
+#define S_TO_US(s)      (s * 1000000UL)
+#define US_TO_S(us)     (us / 1000000UL)
+#define M_TO_S(m)       (m * 60UL)
+#define S_TO_M(s)       (s / 60UL)
+#define M_TO_US(m)      (M_TO_S(m) * 1000000UL)
+#define US_TO_M(us)     (US_TO_S(us) / 60UL)
+#define H_TO_S(h)       (h * 3600UL)
+#define S_TO_H(s)       (s / 3600UL)
+#define H_TO_MS(h)      (H_TO_S(h) * 1000UL)
+#define H_TO_US(h)      (H_TO_S(h) * 1000000UL)
+#define US_TO_H(us)     (US_TO_S(us) / 3600UL)
+
+
 #define CLEAR          0
 #define SET            1
 #define TOGGLE         2
+
+#define SET_GPIO_LOW(gpio)   (gpio = CLEAR)
+#define SET_GPIO_HIGH(gpio)  (gpio = SET)
+#define TOGGLE_GPIO(gpio)    (gpio ^= 1)
+
+/********TEST_POINTS********/
+#define ENABLE_TEST_POINTS
+#define TEST_POINT_1      RD6
+#define TEST_POINT_2      RD7
+
 
 /********INPUT********/
 #define BATT_SW         RC5    //Active High
@@ -70,9 +146,14 @@ typedef enum {
 } SystemState_t;
 
 typedef struct {
+    SystemState_t previous_state;
     SystemState_t current_state;
 } StateMachine_t;
 
 extern volatile StateMachine_t SystemState_obj;
+
+void update_state_machine_state(SystemState_t new_state);
+SystemState_t get_current_state(void);
+SystemState_t get_previous_state(void);
 
 #endif /* DECLARATION_H */

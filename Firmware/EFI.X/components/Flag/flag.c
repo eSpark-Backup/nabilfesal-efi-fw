@@ -8,9 +8,9 @@ void flag_init()
 {
     TRISB1  = 0;
     TRISB2  = 0;
-    
-    LDRV_1 = CLEAR;
-    LDRV_2 = CLEAR;
+
+    SET_GPIO_LOW(LDRV_1);
+    SET_GPIO_LOW(LDRV_2);
 }
 
 /*FLAG SET*/
@@ -19,14 +19,14 @@ void flag_init()
 
 void flag_set()
 {
-    LDRV_1 = CLEAR;
-    LDRV_2 = SET;
+    SET_GPIO_LOW(LDRV_1);
+    SET_GPIO_HIGH(LDRV_2);
     __delay_us(DELAY);
-    LDRV_1 = CLEAR;
-    LDRV_2 = CLEAR;
-    
+    SET_GPIO_LOW(LDRV_1);
+    SET_GPIO_LOW(LDRV_2);
+
     flag_state = SET;  //Set
-    SystemState_obj.current_state = FAULT;
+    update_state_machine_state(FAULT);
 }
 
 /*FLAG RESET*/
@@ -35,24 +35,24 @@ void flag_set()
 
 void flag_reset()
 {
-    LDRV_1 = SET;
-    LDRV_2 = CLEAR;
+    SET_GPIO_HIGH(LDRV_1);
+    SET_GPIO_LOW(LDRV_2);
     __delay_us(DELAY);
-    LDRV_1 = CLEAR;
-    LDRV_2 = CLEAR;
-    
+    SET_GPIO_LOW(LDRV_1);
+    SET_GPIO_LOW(LDRV_2);
+
     flag_state = CLEAR;  //Reset
-    SystemState_obj.current_state = SLEEP;
+    update_state_machine_state(SLEEP);
 }
 
 void flag_toggle()
 {
     if(!flag_state)
     {
-        SystemState_obj.current_state = FLAG_SET;
+        update_state_machine_state(FLAG_SET);
     }
     else
     {
-        SystemState_obj.current_state = FLAG_RESET;
+        update_state_machine_state(FLAG_RESET);
     }
 }

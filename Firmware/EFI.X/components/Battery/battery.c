@@ -10,8 +10,8 @@
 #define EEPROM_ADDR_LSB          0x00
 #define EEPROM_ADDR_MSB          0x01
 
-#define IND_MODE_TIME           (10UL*1000UL*1000UL)/2
-#define COUNTER_RST_HOLD_TIME   (4UL*1000UL*1000UL)/2
+#define IND_MODE_TIME           S_TO_US(10)
+#define COUNTER_RST_HOLD_TIME   S_TO_US(4)
 
 static bool batteryLow = 0;
 static uint16_t event_count = 0;
@@ -23,13 +23,13 @@ void battery_init()
     
     BATT_LOAD = CLEAR;
     OPTION_REGbits.T0CS = 0;   // Internal instruction cycle
-    OPTION_REGbits.PSA = 0;
-    OPTION_REGbits.PS = 0b000; // Prescaler 1:64
+    OPTION_REGbits.PSA = PRESCALAR_SELECTION;
+    OPTION_REGbits.PS = TMR0_PRESCALER; // Prescaler 1:2
     
     TMR0 = 240;                // Preload for ~1ms overflow
-    INTCONbits.TMR0IF = 0;
-    INTCONbits.TMR0IE = 1;
-    INTCONbits.GIE = 1;
+    INTCONbits.TMR0IF = CLEAR;
+    INTCONbits.TMR0IE = SET;
+    INTCONbits.GIE = SET;
 }
 
 uint16_t event_count_read()
@@ -43,7 +43,7 @@ void event_count_inc()
 {
     if (event_count_read() >= EEPROM_RST_VAL)
     {
-        SystemState_obj.current_state = BATTERY_LOW;
+        update_state_machine_state(BATTERY_LOW);
     }
 
     ++event_count;
@@ -92,7 +92,7 @@ void battery_test()
 {   
     BATT_LOAD = SET;
     unsigned long start = get_time_us();
-    while (get_time_us() - start < ((5UL*1000UL)/2))
+    while ((get_time_us() - start) < MS_TO_US(5))
     {
         if(!BATT_LOW_SNS)
         {
@@ -103,7 +103,7 @@ void battery_test()
     BATT_LOAD = CLEAR;
     if(batteryLow)
     {
-        SystemState_obj.current_state = BATTERY_LOW;
+        update_state_machine_state(BATTERY_LOW);
         batteryLow = CLEAR;
     }
     else

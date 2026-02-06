@@ -30,7 +30,7 @@
 
 void adc_init()
 {
-    BOOST_PWR = 0;
+    SET_GPIO_LOW(BOOST_PWR);
     ADCON0 = 0b00011001;     // Channel AN6 (RE1), ADC ON
     ADCON1 = 0b10000000;     // Configure all ANx as analog, Vref = VDD
 }
@@ -41,8 +41,8 @@ void flagdriv_init()
     TRISE1  =   1; // BOOST_FB1
     TRISE2  =   0; // BOOST_FB2
 
-    BOOST_PWR = CLEAR;
-    BOOST_FB2 = CLEAR;
+    SET_GPIO_LOW(BOOST_PWR);
+    SET_GPIO_LOW(BOOST_FB2);
 }
 
 void set_pwm_duty(float duty_percent)
@@ -55,10 +55,12 @@ void set_pwm_duty(float duty_percent)
     unsigned long off_time = (period_us - on_time);
     
     unsigned long now = get_time_us();
-    BOOST_PWR = SET;
+    SET_GPIO_HIGH(BOOST_PWR);
+    // SET_GPIO_HIGH(TEST_POINT_2);
     while ((get_time_us() - now) < on_time);
 
-    BOOST_PWR = CLEAR;
+    SET_GPIO_LOW(BOOST_PWR);
+    // SET_GPIO_LOW(TEST_POINT_2);
     while ((get_time_us() - now) < (on_time + off_time));
 }
 
@@ -76,8 +78,8 @@ float read_ADC_voltage(unsigned char channel)
 
 bool control_boost_output()
 {
-    BOOST_FB2 = 0;
-    BOOST_PWR = 0;
+    SET_GPIO_LOW(BOOST_FB2);
+    SET_GPIO_LOW(BOOST_PWR);
 
     static float pwm_duty = 0;
     static float integral = 0;
@@ -96,13 +98,13 @@ bool control_boost_output()
             if (output > PWM_CLAMP_H) output = PWM_CLAMP_H;
             if (output < PWM_CLAMP_L) output = PWM_CLAMP_L;
             pwm_duty = output;
-             set_pwm_duty(pwm_duty);
+            set_pwm_duty(pwm_duty);
         }
         else
         {
             set_pwm_duty(0);
             __delay_us(100);
-            BOOST_PWR = 0;
+            SET_GPIO_LOW(BOOST_PWR);
             break;
         }
     }
